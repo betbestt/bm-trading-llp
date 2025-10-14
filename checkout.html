@@ -75,8 +75,18 @@
           createdAt: serverTimestamp()
         });
         alert("Order placed successfully! We’ll contact you shortly.");
-        localStorage.removeItem("cart");
-        window.location.href = "index.html";
+
+// Send WhatsApp message (to your business number)
+const message = encodeURIComponent(
+  `🛍️ New Order Received!\n\nName: ${name}\nPhone: ${phone}\nAddress: ${address}\nTotal: KSh ${total.toLocaleString()}\n\nPlease check your admin dashboard for details.`
+);
+const whatsappURL = `https://wa.me/254720300388?text=${message}`;
+
+// Clear cart and redirect to WhatsApp
+localStorage.removeItem("cart");
+window.open(whatsappURL, "_blank");
+window.location.href = "index.html";
+
       } catch (err) {
         console.error(err);
         alert("Failed to place order!");
