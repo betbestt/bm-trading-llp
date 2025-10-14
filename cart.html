@@ -1,128 +1,96 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Cart — B&M Trading LLP</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Your Cart | B&M Trading LLP</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
   <style>
-    main{ max-width:800px; margin:40px auto; background:var(--bg); padding:30px; border-radius:16px; box-shadow:var(--card-shadow);}
-    h1{text-align:center; margin-bottom:30px;}
-    table{width:100%; border-collapse:collapse; margin-bottom:20px;}
-    th,td{padding:12px; text-align:left; border-bottom:1px solid #eee;}
-    th{font-weight:600;}
-    .product-img{width:60px; height:60px; border-radius:8px; object-fit:cover;}
-    .total-row td{font-weight:700; font-size:18px;}
-    input[type=text], input[type=tel]{width:100%; padding:10px; border-radius:8px; border:1px solid #ccc; margin-bottom:10px;}
-    button{width:100%; padding:14px; border:none; border-radius:8px; background:var(--accent); color:white; font-weight:700; cursor:pointer; margin-top:10px;}
-    button:hover{background:var(--accent-dark);}
-    .empty{text-align:center; color:var(--muted-text); margin:40px 0;}
-    .back-home{ position:fixed; left:20px; bottom:20px; background:var(--accent); color:white; padding:12px 16px; border-radius:8px; text-decoration:none; font-weight:700; box-shadow:var(--card-shadow); }
+    body {
+      background-color: #f5f5f7;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    .apple-card {
+      background: white;
+      border-radius: 1rem;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+    }
+    .btn-black {
+      background: black;
+      color: white;
+      border-radius: 9999px;
+      padding: 0.75rem 2rem;
+      transition: background 0.3s;
+    }
+    .btn-black:hover {
+      background: #333;
+    }
   </style>
 </head>
-<body>
-  <header class="site-header">
-    <div class="header-inner">
-      <div class="brand"><div class="logo">B&amp;M Trading LLP</div></div>
+<body class="flex flex-col items-center p-6">
+  
+  <div class="apple-card w-full max-w-4xl p-8">
+    <h1 class="text-3xl font-semibold mb-6 text-gray-900 text-center">Your Shopping Cart</h1>
+    
+    <div id="cartList" class="space-y-4"></div>
+    <p id="emptyCartMsg" class="text-gray-500 text-center hidden">Your cart is currently empty.</p>
+    
+    <div id="totalContainer" class="mt-6 text-right text-lg font-medium text-gray-800"></div>
+
+    <div class="text-center mt-6">
+      <a id="checkoutBtn" href="checkout.html" class="btn-black hidden">Proceed to Checkout</a>
     </div>
-  </header>
-
-  <main>
-    <h1>Your Cart</h1>
-    <div id="cart-container"></div>
-
-    <div id="checkout-section" style="display:none;">
-      <h2>Checkout Details</h2>
-      <input type="text" id="customerName" placeholder="Full Name" required>
-      <input type="tel" id="customerPhone" placeholder="Phone Number" required>
-      <button id="checkoutBtn">Place Order via WhatsApp</button>
-    </div>
-  </main>
-
-  <a href="index.html" class="back-home">← Continue Shopping</a>
-
-  <footer class="site-footer">
-    <div class="footer-inner">
-      <div>© <span id="year"></span> B&amp;M Trading LLP</div>
-    </div>
-  </footer>
+  </div>
 
   <script>
-    const WHATSAPP_NUMBER = "0720300388";
+    const cartList = document.getElementById('cartList');
+    const emptyCartMsg = document.getElementById('emptyCartMsg');
+    const totalContainer = document.getElementById('totalContainer');
+    const checkoutBtn = document.getElementById('checkoutBtn');
 
-    document.getElementById("year").textContent = new Date().getFullYear();
+    function loadCart() {
+      const cart = JSON.parse(localStorage.getItem('cart')) || [];
+      cartList.innerHTML = '';
 
-    const cartContainer = document.getElementById("cart-container");
-    const checkoutSection = document.getElementById("checkout-section");
-    const checkoutBtn = document.getElementById("checkoutBtn");
-
-    let cart = JSON.parse(localStorage.getItem("cart")) || [];
-
-    function renderCart(){
-      if(cart.length === 0){
-        cartContainer.innerHTML = "<p class='empty'>Your cart is empty.</p>";
-        checkoutSection.style.display = "none";
+      if (cart.length === 0) {
+        emptyCartMsg.classList.remove('hidden');
+        totalContainer.textContent = '';
+        checkoutBtn.classList.add('hidden');
         return;
       }
 
+      emptyCartMsg.classList.add('hidden');
+      checkoutBtn.classList.remove('hidden');
       let total = 0;
-      let html = `
-        <table>
-          <thead>
-            <tr><th>Product</th><th>Name</th><th>Price</th><th></th></tr>
-          </thead><tbody>
-      `;
 
-      cart.forEach((item, i)=>{
-        total += item.price;
-        html += `
-          <tr>
-            <td><img src="${item.imageURL}" class="product-img" alt=""></td>
-            <td>${item.name}</td>
-            <td>KSh ${item.price.toLocaleString()}</td>
-            <td><button style="background:#dc2626;padding:6px 10px;border-radius:6px;color:#fff;font-weight:600;font-size:12px;" onclick="removeItem(${i})">Remove</button></td>
-          </tr>
+      cart.forEach((item, index) => {
+        const div = document.createElement('div');
+        div.className = 'flex justify-between items-center border-b pb-3';
+        div.innerHTML = `
+          <div class="flex items-center space-x-4">
+            <img src="${item.imageURL}" alt="${item.name}" class="w-20 h-20 rounded object-cover">
+            <div>
+              <p class="font-medium text-gray-900">${item.name}</p>
+              <p class="text-gray-600 text-sm">KSh ${Number(item.price).toLocaleString()}</p>
+            </div>
+          </div>
+          <button onclick="removeItem(${index})" class="text-red-500 hover:underline">Remove</button>
         `;
+        cartList.appendChild(div);
+        total += Number(item.price);
       });
 
-      html += `<tr class="total-row"><td colspan="2">Total</td><td colspan="2">KSh ${total.toLocaleString()}</td></tr>`;
-      html += `</tbody></table>`;
-      cartContainer.innerHTML = html;
-      checkoutSection.style.display = "block";
+      totalContainer.innerHTML = `Total: <strong>KSh ${total.toLocaleString()}</strong>`;
     }
 
-    function removeItem(i){
-      cart.splice(i,1);
-      localStorage.setItem("cart", JSON.stringify(cart));
-      renderCart();
+    function removeItem(index) {
+      let cart = JSON.parse(localStorage.getItem('cart')) || [];
+      cart.splice(index, 1);
+      localStorage.setItem('cart', JSON.stringify(cart));
+      loadCart();
     }
 
-    renderCart();
-
-    checkoutBtn.addEventListener("click", ()=>{
-      const name = document.getElementById("customerName").value.trim();
-      const phone = document.getElementById("customerPhone").value.trim();
-
-      if(!name || !phone){
-        alert("Please enter your name and phone number.");
-        return;
-      }
-
-      let msg = `🛒 *New Order from B&M Trading LLP Website*%0A%0A`;
-      msg += `👤 Name: ${name}%0A📞 Phone: ${phone}%0A%0A`;
-      msg += `🧾 *Order Details:*%0A`;
-
-      let total = 0;
-      cart.forEach((item, i)=>{
-        msg += `${i+1}. ${item.name} — KSh ${item.price.toLocaleString()}%0A`;
-        total += item.price;
-      });
-
-      msg += `%0A💰 *Total:* KSh ${total.toLocaleString()}%0A%0AThank you for shopping with us!`;
-
-      const url = `https://wa.me/254${WHATSAPP_NUMBER.substring(1)}?text=${msg}`;
-      window.open(url, "_blank");
-    });
+    loadCart();
   </script>
 </body>
 </html>
