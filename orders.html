@@ -4,133 +4,157 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Orders | B&M Trading LLP</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    h2 { text-align: center; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th, td { border: 1px solid #ddd; padding: 10px; text-align: left; vertical-align: top; }
-    th { background-color: #007bff; color: white; }
-    tr:nth-child(even) { background-color: #f2f2f2; }
-    .logout-btn {
-      background: #c0392b;
-      color: white;
-      padding: 8px 14px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      float: right;
+    body {
+      background-color: #f5f5f7;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    .apple-card {
+      background: white;
+      border-radius: 1rem;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+      transition: transform 0.3s ease;
+    }
+    .apple-card:hover {
+      transform: translateY(-2px);
+    }
+    .login-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+      visibility: hidden;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .login-modal.active {
+      visibility: visible;
+      opacity: 1;
     }
   </style>
 </head>
-<body>
-  <h2>Customer Orders</h2>
-  <button class="logout-btn" onclick="logout()">Logout</button>
-  <input type="text" id="search" placeholder="Search by name or phone..." 
-  style="width:100%;padding:10px;margin-bottom:15px;border:1px solid #ccc;border-radius:6px;">
+<body class="min-h-screen flex flex-col items-center justify-center">
 
-  <table id="orders-table">
-    <thead>
-      <tr>
-        <th>Customer</th>
-        <th>Phone</th>
-        <th>Address</th>
-        <th>Items</th>
-        <th>Total (KSh)</th>
-        <th>Date</th>
-      </tr>
-    </thead>
-    <tbody id="orders-body">
-      <tr><td colspan="6" style="text-align:center;">Loading orders...</td></tr>
-    </tbody>
-  </table>
+  <!-- Admin Login Modal -->
+  <div id="loginModal" class="login-modal">
+    <div class="apple-card p-8 w-96 text-center">
+      <h2 class="text-2xl font-semibold mb-4 text-gray-800">Admin Login</h2>
+      <input id="adminPhone" type="text" placeholder="Phone (e.g. 0720300388)" class="w-full mb-3 p-2 border rounded">
+      <input id="adminPassword" type="password" placeholder="Password" class="w-full mb-3 p-2 border rounded">
+      <button id="loginBtn" class="bg-black text-white py-2 px-6 rounded hover:bg-gray-800 w-full">Login</button>
+    </div>
+  </div>
+
+  <!-- Orders Section -->
+  <div id="ordersSection" class="apple-card p-8 w-full max-w-5xl hidden">
+    <h1 class="text-3xl font-semibold text-gray-900 mb-6 text-center">Customer Orders</h1>
+
+    <div class="mb-6 flex justify-between items-center">
+      <input type="text" id="searchInput" placeholder="Search by customer name or phone..." class="p-2 border rounded w-1/2">
+      <select id="statusFilter" class="p-2 border rounded">
+        <option value="">All Status</option>
+        <option>Pending</option>
+        <option>Shipped</option>
+        <option>Delivered</option>
+      </select>
+    </div>
+
+    <!-- Orders Table -->
+    <div class="overflow-x-auto">
+      <table class="min-w-full text-sm text-gray-700">
+        <thead>
+          <tr class="bg-gray-100 text-gray-800">
+            <th class="p-3 text-left">Order ID</th>
+            <th class="p-3 text-left">Customer</th>
+            <th class="p-3 text-left">Phone</th>
+            <th class="p-3 text-left">Product</th>
+            <th class="p-3 text-left">Amount</th>
+            <th class="p-3 text-left">Status</th>
+            <th class="p-3 text-left">Date</th>
+          </tr>
+        </thead>
+        <tbody id="ordersTable">
+          <!-- Demo Orders -->
+          <tr class="border-t hover:bg-gray-50">
+            <td class="p-3">#1001</td>
+            <td class="p-3">John Mwangi</td>
+            <td class="p-3">0712345678</td>
+            <td class="p-3">iPhone 14 Pro</td>
+            <td class="p-3">KES 175,000</td>
+            <td class="p-3 text-yellow-600 font-medium">Pending</td>
+            <td class="p-3">2025-10-13</td>
+          </tr>
+          <tr class="border-t hover:bg-gray-50">
+            <td class="p-3">#1002</td>
+            <td class="p-3">Mary Achieng</td>
+            <td class="p-3">0798765432</td>
+            <td class="p-3">MacBook Air M2</td>
+            <td class="p-3">KES 195,000</td>
+            <td class="p-3 text-green-600 font-medium">Delivered</td>
+            <td class="p-3">2025-10-12</td>
+          </tr>
+          <tr class="border-t hover:bg-gray-50">
+            <td class="p-3">#1003</td>
+            <td class="p-3">Kevin Otieno</td>
+            <td class="p-3">0723456789</td>
+            <td class="p-3">Apple Watch Ultra</td>
+            <td class="p-3">KES 110,000</td>
+            <td class="p-3 text-blue-600 font-medium">Shipped</td>
+            <td class="p-3">2025-10-14</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 
   <script>
-    // Admin protection
-    if (localStorage.getItem("isAdmin") !== "true") {
-      alert("Access denied. Please log in as admin.");
-      window.location.href = "login.html";
-    }
+    const modal = document.getElementById('loginModal');
+    const loginBtn = document.getElementById('loginBtn');
+    const ordersSection = document.getElementById('ordersSection');
 
-    function logout() {
-      localStorage.removeItem("isAdmin");
-      alert("Logged out!");
-      window.location.href = "login.html";
-    }
-  </script>
+    // Show modal on load
+    window.addEventListener('load', () => modal.classList.add('active'));
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-    import { getFirestore, collection, getDocs, orderBy, query } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-    import { format } from "https://cdn.jsdelivr.net/npm/date-fns@3.6.0/+esm";
+    // Admin login
+    loginBtn.addEventListener('click', () => {
+      const phone = document.getElementById('adminPhone').value.trim();
+      const password = document.getElementById('adminPassword').value.trim();
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyCjf6QOf7gdq1StOBdf5zWtWyde-Gis0Nc",
-      authDomain: "bm-trading-llp.firebaseapp.com",
-      projectId: "bm-trading-llp",
-      storageBucket: "bm-trading-llp.firebasestorage.app",
-      messagingSenderId: "760421393441",
-      appId: "1:760421393441:web:bda19fd259add66b892f60",
-      measurementId: "G-FXSZ8BFMK2"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    const tbody = document.getElementById("orders-body");
-    tbody.innerHTML = "";
-
-    async function loadOrders() {
-      try {
-        const q = query(collection(db, "orders"), orderBy("createdAt", "desc"));
-        const snap = await getDocs(q);
-
-        if (snap.empty) {
-          tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">No orders yet.</td></tr>`;
-          return;
-        }
-
-        snap.forEach(doc => {
-          const order = doc.data();
-          const tr = document.createElement("tr");
-
-          const itemsHTML = order.items.map(i => `
-            <div>
-              <img src="${i.image}" width="60" style="border-radius:6px;margin-right:5px;vertical-align:middle;">
-              <strong>${i.name}</strong> — KSh ${Number(i.price).toLocaleString()}
-            </div>
-          `).join("");
-
-          const date = order.createdAt?.toDate ? format(order.createdAt.toDate(), "PPpp") : "—";
-
-          tr.innerHTML = `
-            <td>${order.name}</td>
-            <td>${order.phone}</td>
-            <td>${order.address}</td>
-            <td>${itemsHTML}</td>
-            <td>${Number(order.total).toLocaleString()}</td>
-            <td>${date}</td>
-          `;
-          tbody.appendChild(tr);
-        });
-      } catch (err) {
-        console.error("Error loading orders:", err);
-        tbody.innerHTML = `<tr><td colspan="6" style="color:red;text-align:center;">Failed to load orders.</td></tr>`;
+      if (phone === '0720300388' && password === 'Brian') {
+        modal.classList.remove('active');
+        ordersSection.classList.remove('hidden');
+      } else {
+        alert('Invalid admin credentials');
       }
+    });
+
+    // Search & filter
+    const searchInput = document.getElementById('searchInput');
+    const statusFilter = document.getElementById('statusFilter');
+    const tableRows = document.querySelectorAll('#ordersTable tr');
+
+    function filterOrders() {
+      const search = searchInput.value.toLowerCase();
+      const status = statusFilter.value;
+
+      tableRows.forEach(row => {
+        const name = row.children[1].textContent.toLowerCase();
+        const phone = row.children[2].textContent.toLowerCase();
+        const rowStatus = row.children[5].textContent;
+
+        const matchesSearch = name.includes(search) || phone.includes(search);
+        const matchesStatus = !status || rowStatus.includes(status);
+
+        row.style.display = matchesSearch && matchesStatus ? '' : 'none';
+      });
     }
 
-    loadOrders();
-    // live search
-const searchInput = document.getElementById("search");
-searchInput.addEventListener("input", () => {
-  const term = searchInput.value.toLowerCase();
-  const rows = document.querySelectorAll("#orders-body tr");
-  rows.forEach(row => {
-    const text = row.innerText.toLowerCase();
-    row.style.display = text.includes(term) ? "" : "none";
-  });
-});
-
+    searchInput.addEventListener('input', filterOrders);
+    statusFilter.addEventListener('change', filterOrders);
   </script>
 </body>
 </html>
