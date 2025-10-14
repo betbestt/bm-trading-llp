@@ -198,6 +198,15 @@
 
     // initialize
     loadProducts();
+    button.addEventListener("click", () => {
+  const item = { name: data.name, price: data.price, imageURL: data.imageURL };
+  let cart = JSON.parse(localStorage.getItem("cart")) || [];
+  cart.push(item);
+  localStorage.setItem("cart", JSON.stringify(cart));
+  alert("Added to cart!");
+});
+
   </script>
 </body>
 </html>
+
