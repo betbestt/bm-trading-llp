@@ -1,90 +1,130 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Checkout - B&M Trading LLP</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Checkout | B&M Trading LLP</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
   <style>
-    body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: #fafafa; }
-    form { max-width: 500px; margin: 30px auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
-    input, textarea { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 5px; }
-    button { background: #007bff; color: #fff; border: none; padding: 12px; border-radius: 5px; cursor: pointer; width: 100%; }
-    button:hover { background: #0056b3; }
-    h2 { text-align: center; }
+    body {
+      background-color: #f5f5f7;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    .apple-card {
+      background: white;
+      border-radius: 1rem;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+    }
+    .btn-black {
+      background: black;
+      color: white;
+      border-radius: 9999px;
+      padding: 0.75rem 2rem;
+      transition: background 0.3s;
+    }
+    .btn-black:hover {
+      background: #333;
+    }
   </style>
 </head>
-<body>
-  <h2>Checkout</h2>
-  <form id="checkoutForm">
-    <label>Full Name</label>
-    <input type="text" id="name" required>
+<body class="flex flex-col items-center p-6">
+  
+  <div class="apple-card w-full max-w-4xl p-8">
+    <h1 class="text-3xl font-semibold mb-6 text-gray-900 text-center">Checkout</h1>
+    
+    <!-- Cart Items -->
+    <div id="cartItems" class="mb-6 border-b pb-4">
+      <h2 class="text-xl font-semibold mb-4">Your Cart</h2>
+      <div id="cartList" class="space-y-3"></div>
+      <p id="emptyCartMsg" class="text-gray-500 text-center hidden">Your cart is empty.</p>
+      <div id="totalContainer" class="mt-4 text-right text-lg font-medium text-gray-800"></div>
+    </div>
 
-    <label>Phone Number</label>
-    <input type="tel" id="phone" required>
+    <!-- Customer Info -->
+    <div id="checkoutForm">
+      <h2 class="text-xl font-semibold mb-4">Delivery Details</h2>
+      <form id="orderForm" class="space-y-4">
+        <input type="text" id="custName" placeholder="Full Name" required class="w-full border p-3 rounded">
+        <input type="tel" id="custPhone" placeholder="Phone Number (e.g. 0720 000000)" required class="w-full border p-3 rounded">
+        <input type="text" id="custAddress" placeholder="Delivery Address / Location" required class="w-full border p-3 rounded">
+        <textarea id="custNote" placeholder="Additional Notes (optional)" class="w-full border p-3 rounded"></textarea>
 
-    <label>Delivery Address</label>
-    <textarea id="address" required></textarea>
+        <div class="text-center pt-4">
+          <button type="submit" class="btn-black">Place Order</button>
+        </div>
+      </form>
+    </div>
 
-    <button type="submit">Place Order</button>
-  </form>
+    <!-- Success Message -->
+    <div id="successMessage" class="hidden text-center mt-8">
+      <h2 class="text-2xl font-semibold text-green-600">✅ Thank you!</h2>
+      <p class="text-gray-700 mt-2">Your order has been placed successfully. We’ll contact you shortly to confirm delivery.</p>
+      <a href="index.html" class="inline-block mt-4 text-blue-600 hover:underline">← Back to Shop</a>
+    </div>
+  </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+  <script>
+    const cartList = document.getElementById('cartList');
+    const emptyCartMsg = document.getElementById('emptyCartMsg');
+    const totalContainer = document.getElementById('totalContainer');
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyCjf6QOf7gdq1StOBdf5zWtWyde-Gis0Nc",
-      authDomain: "bm-trading-llp.firebaseapp.com",
-      projectId: "bm-trading-llp",
-      storageBucket: "bm-trading-llp.firebasestorage.app",
-      messagingSenderId: "760421393441",
-      appId: "1:760421393441:web:bda19fd259add66b892f60",
-      measurementId: "G-FXSZ8BFMK2"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    const form = document.getElementById("checkoutForm");
-
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const name = document.getElementById("name").value;
-      const phone = document.getElementById("phone").value;
-      const address = document.getElementById("address").value;
-      const cart = JSON.parse(localStorage.getItem("cart")) || [];
-
+    function loadCart() {
+      const cart = JSON.parse(localStorage.getItem('cart')) || [];
+      cartList.innerHTML = '';
+      
       if (cart.length === 0) {
-        alert("Your cart is empty!");
+        emptyCartMsg.classList.remove('hidden');
+        totalContainer.textContent = '';
         return;
       }
 
-      const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+      emptyCartMsg.classList.add('hidden');
+      let total = 0;
 
-      try {
-        await addDoc(collection(db, "orders"), {
-          name,
-          phone,
-          address,
-          cart,
-          total,
-          createdAt: serverTimestamp()
-        });
+      cart.forEach((item, index) => {
+        const div = document.createElement('div');
+        div.className = 'flex justify-between items-center border-b pb-2';
+        div.innerHTML = `
+          <div class="flex items-center space-x-4">
+            <img src="${item.imageURL}" alt="${item.name}" class="w-16 h-16 rounded object-cover">
+            <div>
+              <p class="font-medium">${item.name}</p>
+              <p class="text-gray-600 text-sm">KSh ${Number(item.price).toLocaleString()}</p>
+            </div>
+          </div>
+          <button onclick="removeItem(${index})" class="text-red-500 hover:underline">Remove</button>
+        `;
+        cartList.appendChild(div);
+        total += Number(item.price);
+      });
 
-        // Send WhatsApp notification
-        const message = encodeURIComponent(
-          `🛍️ New Order from ${name}\n📞 ${phone}\n🏠 ${address}\n\nTotal: KSh ${total.toLocaleString()}\n\nThank you for shopping with B&M Trading LLP!`
-        );
-        const whatsappNumber = "254720300388";
-        window.open(`https://wa.me/${whatsappNumber}?text=${message}`, "_blank");
+      totalContainer.innerHTML = `Total: <strong>KSh ${total.toLocaleString()}</strong>`;
+    }
 
-        alert("Order placed successfully!");
-        localStorage.removeItem("cart");
-        window.location.href = "index.html";
-      } catch (err) {
-        console.error("Error saving order:", err);
-        alert("Failed to place order. Please try again.");
-      }
+    function removeItem(index) {
+      let cart = JSON.parse(localStorage.getItem('cart')) || [];
+      cart.splice(index, 1);
+      localStorage.setItem('cart', JSON.stringify(cart));
+      loadCart();
+    }
+
+    loadCart();
+
+    // Handle order form
+    const orderForm = document.getElementById('orderForm');
+    const successMessage = document.getElementById('successMessage');
+    const checkoutForm = document.getElementById('checkoutForm');
+
+    orderForm.addEventListener('submit', e => {
+      e.preventDefault();
+
+      // For now, just show success (later we’ll send to Firebase)
+      localStorage.removeItem('cart');
+      checkoutForm.classList.add('hidden');
+      document.getElementById('cartItems').classList.add('hidden');
+      successMessage.classList.remove('hidden');
     });
   </script>
+
 </body>
 </html>
