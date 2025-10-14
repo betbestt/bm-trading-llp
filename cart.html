@@ -1,94 +1,128 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Your Cart - B&M Trading LLP</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Cart — B&M Trading LLP</title>
+  <link rel="stylesheet" href="style.css">
   <style>
-    body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: #fafafa; }
-    h2 { text-align: center; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
-    th { background: #f8f8f8; }
-    img { width: 60px; height: 60px; object-fit: cover; border-radius: 5px; }
-    .total { font-weight: bold; margin-top: 20px; text-align: right; }
-    .btn { background: #007bff; color: white; padding: 10px 15px; border: none; cursor: pointer; border-radius: 5px; }
-    .btn:hover { background: #0056b3; }
-    .actions { display: flex; justify-content: space-between; margin-top: 20px; }
+    main{ max-width:800px; margin:40px auto; background:var(--bg); padding:30px; border-radius:16px; box-shadow:var(--card-shadow);}
+    h1{text-align:center; margin-bottom:30px;}
+    table{width:100%; border-collapse:collapse; margin-bottom:20px;}
+    th,td{padding:12px; text-align:left; border-bottom:1px solid #eee;}
+    th{font-weight:600;}
+    .product-img{width:60px; height:60px; border-radius:8px; object-fit:cover;}
+    .total-row td{font-weight:700; font-size:18px;}
+    input[type=text], input[type=tel]{width:100%; padding:10px; border-radius:8px; border:1px solid #ccc; margin-bottom:10px;}
+    button{width:100%; padding:14px; border:none; border-radius:8px; background:var(--accent); color:white; font-weight:700; cursor:pointer; margin-top:10px;}
+    button:hover{background:var(--accent-dark);}
+    .empty{text-align:center; color:var(--muted-text); margin:40px 0;}
+    .back-home{ position:fixed; left:20px; bottom:20px; background:var(--accent); color:white; padding:12px 16px; border-radius:8px; text-decoration:none; font-weight:700; box-shadow:var(--card-shadow); }
   </style>
 </head>
 <body>
-  <h2>Your Shopping Cart</h2>
-  <table>
-    <thead>
-      <tr>
-        <th>Image</th>
-        <th>Name</th>
-        <th>Qty</th>
-        <th>Price (KSh)</th>
-        <th>Total (KSh)</th>
-        <th>Action</th>
-      </tr>
-    </thead>
-    <tbody id="cart-body"></tbody>
-  </table>
-  <p class="total" id="cart-total"></p>
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="brand"><div class="logo">B&amp;M Trading LLP</div></div>
+    </div>
+  </header>
 
-  <div class="actions">
-    <button class="btn" id="clear-cart">Clear Cart</button>
-    <button class="btn" id="checkout">Proceed to Checkout</button>
-  </div>
+  <main>
+    <h1>Your Cart</h1>
+    <div id="cart-container"></div>
+
+    <div id="checkout-section" style="display:none;">
+      <h2>Checkout Details</h2>
+      <input type="text" id="customerName" placeholder="Full Name" required>
+      <input type="tel" id="customerPhone" placeholder="Phone Number" required>
+      <button id="checkoutBtn">Place Order via WhatsApp</button>
+    </div>
+  </main>
+
+  <a href="index.html" class="back-home">← Continue Shopping</a>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div>© <span id="year"></span> B&amp;M Trading LLP</div>
+    </div>
+  </footer>
 
   <script>
-    function loadCart() {
-      let cart = JSON.parse(localStorage.getItem("cart")) || [];
-      const body = document.getElementById("cart-body");
-      const totalElem = document.getElementById("cart-total");
-      body.innerHTML = "";
-      let total = 0;
+    const WHATSAPP_NUMBER = "0720300388";
 
-      if (cart.length === 0) {
-        body.innerHTML = "<tr><td colspan='6'>Your cart is empty.</td></tr>";
-        totalElem.textContent = "";
+    document.getElementById("year").textContent = new Date().getFullYear();
+
+    const cartContainer = document.getElementById("cart-container");
+    const checkoutSection = document.getElementById("checkout-section");
+    const checkoutBtn = document.getElementById("checkoutBtn");
+
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+    function renderCart(){
+      if(cart.length === 0){
+        cartContainer.innerHTML = "<p class='empty'>Your cart is empty.</p>";
+        checkoutSection.style.display = "none";
         return;
       }
 
-      cart.forEach((item, index) => {
-        const itemTotal = item.price * item.quantity;
-        total += itemTotal;
-        body.innerHTML += `
+      let total = 0;
+      let html = `
+        <table>
+          <thead>
+            <tr><th>Product</th><th>Name</th><th>Price</th><th></th></tr>
+          </thead><tbody>
+      `;
+
+      cart.forEach((item, i)=>{
+        total += item.price;
+        html += `
           <tr>
-            <td><img src="${item.image}" alt="${item.name}"></td>
+            <td><img src="${item.imageURL}" class="product-img" alt=""></td>
             <td>${item.name}</td>
-            <td>${item.quantity}</td>
-            <td>${item.price.toLocaleString()}</td>
-            <td>${itemTotal.toLocaleString()}</td>
-            <td><button class="btn remove" data-index="${index}">Remove</button></td>
+            <td>KSh ${item.price.toLocaleString()}</td>
+            <td><button style="background:#dc2626;padding:6px 10px;border-radius:6px;color:#fff;font-weight:600;font-size:12px;" onclick="removeItem(${i})">Remove</button></td>
           </tr>
         `;
       });
 
-      totalElem.textContent = "Grand Total: KSh " + total.toLocaleString();
+      html += `<tr class="total-row"><td colspan="2">Total</td><td colspan="2">KSh ${total.toLocaleString()}</td></tr>`;
+      html += `</tbody></table>`;
+      cartContainer.innerHTML = html;
+      checkoutSection.style.display = "block";
     }
 
-    document.addEventListener("click", (e) => {
-      if (e.target.classList.contains("remove")) {
-        let cart = JSON.parse(localStorage.getItem("cart")) || [];
-        cart.splice(e.target.dataset.index, 1);
-        localStorage.setItem("cart", JSON.stringify(cart));
-        loadCart();
+    function removeItem(i){
+      cart.splice(i,1);
+      localStorage.setItem("cart", JSON.stringify(cart));
+      renderCart();
+    }
+
+    renderCart();
+
+    checkoutBtn.addEventListener("click", ()=>{
+      const name = document.getElementById("customerName").value.trim();
+      const phone = document.getElementById("customerPhone").value.trim();
+
+      if(!name || !phone){
+        alert("Please enter your name and phone number.");
+        return;
       }
-    });
 
-    document.getElementById("clear-cart").addEventListener("click", () => {
-      localStorage.removeItem("cart");
-      loadCart();
-    });
+      let msg = `🛒 *New Order from B&M Trading LLP Website*%0A%0A`;
+      msg += `👤 Name: ${name}%0A📞 Phone: ${phone}%0A%0A`;
+      msg += `🧾 *Order Details:*%0A`;
 
-    document.getElementById("checkout").addEventListener("click", () => {
-      window.location.href = "checkout.html";
-    });
+      let total = 0;
+      cart.forEach((item, i)=>{
+        msg += `${i+1}. ${item.name} — KSh ${item.price.toLocaleString()}%0A`;
+        total += item.price;
+      });
 
-    loadCart();
+      msg += `%0A💰 *Total:* KSh ${total.toLocaleString()}%0A%0AThank you for shopping with us!`;
+
+      const url = `https://wa.me/254${WHATSAPP_NUMBER.substring(1)}?text=${msg}`;
+      window.open(url, "_blank");
+    });
   </script>
 </body>
 </html>
