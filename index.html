@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>B&M Trading LLP — Shop</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="top-bar">
+    <p>Seen it cheaper? Ask for a B&M Trading deal. <a href="#">Live chat</a> or call <strong>0738 333 000</strong></p>
+  </div>
+
+  <header>
+    <div class="logo">B&M Trading LLP</div>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="add-product.html">Add Product</a>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <div class="hero-content">
+      <h1>The Latest Apple & Tech Products</h1>
+      <p>Shop premium iPhones, MacBooks and accessories in Nairobi.</p>
+      <a href="#products" class="btn">Shop Now</a>
+    </div>
+  </section>
+
+  <section class="offer">
+    <h2>FREE Delivery On All Orders Above KSh 20,000</h2>
+  </section>
+
+  <section id="products" class="products">
+    <h2>Trending Now</h2>
+    <div id="product-grid" class="product-grid"></div>
+    <p id="no-products" style="display:none;text-align:center;color:#666;">No products yet — add some from the Add Product page.</p>
+  </section>
+
+  <section id="about" class="about">
+    <h2>About B&M Trading LLP</h2>
+    <p>We are a trusted electronics company based in Nairobi, dealing in authentic Apple products and accessories. Visit us at Queensway House, Kaunda Street.</p>
+  </section>
+
+  <section id="contact" class="contact">
+    <h2>Contact Us</h2>
+    <p><strong>Address:</strong> Queensway House, Kaunda St, Nairobi</p>
+    <p><strong>Phone:</strong> 0738 333 000</p>
+    <iframe src="https://www.google.com/maps?q=Queensway+House,+Nairobi&output=embed" width="100%" height="250" style="border:0;"></iframe>
+  </section>
+
+  <a href="https://wa.me/254738333000" class="whatsapp" target="_blank" rel="noopener">💬 WhatsApp Us</a>
+
+  <footer>
+    <p>© 2025 B&M Trading LLP | All Rights Reserved</p>
+  </footer>
+
+  <!-- Firebase + App logic -->
+  <script type="module">
+    // Firebase v11 module imports
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+    // ←—— YOUR firebaseConfig (provided by you) ———→
+    const firebaseConfig = {
+      apiKey: "AIzaSyCjf6QOf7gdq1StOBdf5zWtWyde-Gis0Nc",
+      authDomain: "bm-trading-llp.firebaseapp.com",
+      projectId: "bm-trading-llp",
+      storageBucket: "bm-trading-llp.firebasestorage.app",
+      messagingSenderId: "760421393441",
+      appId: "1:760421393441:web:bda19fd259add66b892f60",
+      measurementId: "G-FXSZ8BFMK2"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    async function loadProducts() {
+      const grid = document.getElementById("product-grid");
+      const noProducts = document.getElementById("no-products");
+      grid.innerHTML = "";
+
+      try {
+        // get all products ordered by timestamp (if you later add timestamp on add)
+        const q = query(collection(db, "products"), orderBy("createdAt", "desc"));
+        const snap = await getDocs(q);
+
+        if (snap.empty) {
+          noProducts.style.display = "block";
+          return;
+        } else {
+          noProducts.style.display = "none";
+        }
+
+        snap.forEach(doc => {
+          const data = doc.data();
+          const div = document.createElement("div");
+          div.className = "product";
+          div.innerHTML = `
+            <div class="product-thumb"><img src="${data.imageURL}" alt="${escapeHtml(data.name)}"></div>
+            <h3>${escapeHtml(data.name)}</h3>
+            <p class="price">KSh ${formatNumber(data.price)}</p>
+            <button class="add-cart" data-id="${doc.id}">Add to Cart</button>
+          `;
+          grid.appendChild(div);
+        });
+      } catch (err) {
+        console.error("Error loading products:", err);
+        document.getElementById("product-grid").innerHTML = "<p style='color:red'>Failed to load products.</p>";
+      }
+    }
+
+    // small helpers
+    function formatNumber(n){ try { return Number(n).toLocaleString(); } catch(e){ return n; } }
+    function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c])); }
+
+    // load on start
+    loadProducts();
+  </script>
+</body>
+</html>

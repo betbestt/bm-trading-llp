@@ -1,0 +1,107 @@
+/* Basic, mobile-first styling — tweak as you like */
+:root{
+  --nav:#0d2c54;
+  --accent:#f8b400;
+  --muted:#f4f6f8;
+}
+
+*{box-sizing:border-box}
+body{
+  font-family: Arial, Helvetica, sans-serif;
+  margin:0;
+  background:var(--muted);
+  color:#222;
+}
+
+/* top bar */
+.top-bar{
+  background:var(--nav);
+  color:#fff;
+  text-align:center;
+  padding:10px;
+  font-size:14px;
+}
+.top-bar a{ color:var(--accent); text-decoration: none; }
+
+/* header */
+header{
+  background:#fff;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:14px 18px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.logo{ color:var(--nav); font-weight:700; font-size:18px;}
+nav a{ margin-left:12px; color:var(--nav); text-decoration:none; font-weight:500; }
+
+/* hero */
+.hero{
+  background: url('images/hero-banner.jpg') center/cover no-repeat;
+  color:#fff;
+  text-align:center;
+  padding:60px 18px;
+}
+.hero-content h1{ margin:0 0 8px; font-size:24px; }
+.btn{ display:inline-block; margin-top:12px; background:var(--accent); color:#fff; padding:10px 16px; border-radius:6px; text-decoration:none; }
+
+/* offer */
+.offer{ background:var(--accent); color:#fff; text-align:center; padding:12px; font-weight:700; }
+
+/* products */
+.products{ padding:28px 14px; max-width:1100px; margin:0 auto; }
+.product-grid{
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
+  gap:18px;
+}
+.product{
+  background:#fff;
+  border-radius:10px;
+  padding:12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  text-align:center;
+}
+.product-thumb img{ width:100%; height:180px; object-fit:cover; border-radius:8px; }
+.product h3{ font-size:16px; margin:10px 0 6px; }
+.price{ color:var(--accent); font-weight:700; margin-bottom:8px; }
+button.add-cart{
+  background:var(--nav); color:#fff; border:none; padding:9px 12px; border-radius:6px; cursor:pointer;
+}
+
+/* form page */
+.form{
+  max-width:700px;
+  margin:30px auto;
+  padding:18px;
+}
+.form input[type="text"], .form input[type="number"], .form input[type="file"]{
+  width:100%;
+  padding:10px;
+  margin:8px 0;
+  border-radius:6px;
+  border:1px solid #ddd;
+}
+#uploadBtn{ width:100%; padding:12px; background:var(--nav); color:#fff; border:none; border-radius:8px; cursor:pointer; }
+
+/* whatsapp floating */
+.whatsapp{
+  position:fixed;
+  right:18px;
+  bottom:18px;
+  background:#25D366;
+  color:#fff;
+  padding:12px 16px;
+  border-radius:50px;
+  text-decoration:none;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+}
+
+/* footer */
+footer{ background:var(--nav); color:#fff; padding:14px; text-align:center; margin-top:28px; }
+
+/* responsive tweaks */
+@media (min-width:900px){
+  .hero{ padding:100px 18px; }
+  .product-thumb img{ height:200px; }
+}
