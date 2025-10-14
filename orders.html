@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Orders | B&M Trading LLP</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    h2 { text-align: center; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ddd; padding: 10px; text-align: left; vertical-align: top; }
+    th { background-color: #007bff; color: white; }
+    tr:nth-child(even) { background-color: #f2f2f2; }
+    .logout-btn {
+      background: #c0392b;
+      color: white;
+      padding: 8px 14px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      float: right;
+    }
+  </style>
+</head>
+<body>
+  <h2>Customer Orders</h2>
+  <button class="logout-btn" onclick="logout()">Logout</button>
+  <table id="orders-table">
+    <thead>
+      <tr>
+        <th>Customer</th>
+        <th>Phone</th>
+        <th>Address</th>
+        <th>Items</th>
+        <th>Total (KSh)</th>
+        <th>Date</th>
+      </tr>
+    </thead>
+    <tbody id="orders-body">
+      <tr><td colspan="6" style="text-align:center;">Loading orders...</td></tr>
+    </tbody>
+  </table>
+
+  <script>
+    // Admin protection
+    if (localStorage.getItem("isAdmin") !== "true") {
+      alert("Access denied. Please log in as admin.");
+      window.location.href = "login.html";
+    }
+
+    function logout() {
+      localStorage.removeItem("isAdmin");
+      alert("Logged out!");
+      window.location.href = "login.html";
+    }
+  </script>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getFirestore, collection, getDocs, orderBy, query } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+    import { format } from "https://cdn.jsdelivr.net/npm/date-fns@3.6.0/+esm";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCjf6QOf7gdq1StOBdf5zWtWyde-Gis0Nc",
+      authDomain: "bm-trading-llp.firebaseapp.com",
+      projectId: "bm-trading-llp",
+      storageBucket: "bm-trading-llp.firebasestorage.app",
+      messagingSenderId: "760421393441",
+      appId: "1:760421393441:web:bda19fd259add66b892f60",
+      measurementId: "G-FXSZ8BFMK2"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const tbody = document.getElementById("orders-body");
+    tbody.innerHTML = "";
+
+    async function loadOrders() {
+      try {
+        const q = query(collection(db, "orders"), orderBy("createdAt", "desc"));
+        const snap = await getDocs(q);
+
+        if (snap.empty) {
+          tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">No orders yet.</td></tr>`;
+          return;
+        }
+
+        snap.forEach(doc => {
+          const order = doc.data();
+          const tr = document.createElement("tr");
+
+          const itemsHTML = order.items.map(i => `
+            <div>
+              <img src="${i.image}" width="60" style="border-radius:6px;margin-right:5px;vertical-align:middle;">
+              <strong>${i.name}</strong> — KSh ${Number(i.price).toLocaleString()}
+            </div>
+          `).join("");
+
+          const date = order.createdAt?.toDate ? format(order.createdAt.toDate(), "PPpp") : "—";
+
+          tr.innerHTML = `
+            <td>${order.name}</td>
+            <td>${order.phone}</td>
+            <td>${order.address}</td>
+            <td>${itemsHTML}</td>
+            <td>${Number(order.total).toLocaleString()}</td>
+            <td>${date}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } catch (err) {
+        console.error("Error loading orders:", err);
+        tbody.innerHTML = `<tr><td colspan="6" style="color:red;text-align:center;">Failed to load orders.</td></tr>`;
+      }
+    }
+
+    loadOrders();
+  </script>
+</body>
+</html>
