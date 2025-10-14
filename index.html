@@ -5,6 +5,17 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>B&M Trading LLP — Shop</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    /* Small additions for search/filter UI inside the page (keeps main style) */
+    .controls { max-width:1200px; margin:18px auto; display:flex; gap:12px; align-items:center; padding:0 18px; }
+    .search-input { flex:1; min-width:180px; padding:10px 14px; border-radius:10px; border:1px solid #e6e9ef; background:#fff; }
+    .category-select { padding:10px 14px; border-radius:10px; border:1px solid #e6e9ef; background:#fff; font-weight:700; }
+    .filters-row { display:flex; gap:12px; align-items:center; justify-content:center; margin-bottom:6px; }
+    .chip { padding:8px 12px; border-radius:999px; background:#f1f5f9; cursor:pointer; color:#374151; font-weight:600; border:1px solid transparent; }
+    .chip.active { background:var(--accent); color:#fff; border-color:var(--accent-dark); box-shadow:0 6px 18px rgba(13,110,253,0.08); }
+    .results-info { max-width:1200px; margin:6px auto 0; padding:0 18px; color:var(--muted-text); font-weight:600; }
+    @media (max-width:680px){ .controls{ flex-direction:column; align-items:stretch; } .hero-inner{grid-template-columns:1fr} }
+  </style>
 </head>
 <body>
   <header class="site-header">
@@ -17,13 +28,14 @@
       <nav class="main-nav">
         <a href="index.html" class="nav-link">Home</a>
         <a href="add-product.html" class="nav-link">Add Product</a>
-        <a href="cart.html" class="nav-link cart-link">Cart</a>
+        <a href="cart.html" class="nav-link">Cart</a>
+        <a href="orders.html" class="nav-link">Orders</a>
       </nav>
     </div>
   </header>
 
   <main>
-    <!-- HERO -->
+    <!-- HERO (same clean Apple style) -->
     <section class="hero">
       <div class="hero-inner">
         <div class="hero-content">
@@ -34,9 +46,7 @@
             <a href="contact.html" class="btn btn-ghost">Store Info</a>
           </div>
         </div>
-        <div class="hero-image" aria-hidden="true">
-          <!-- decorative image -->
-        </div>
+        <div class="hero-image" aria-hidden="true"></div>
       </div>
     </section>
 
@@ -49,7 +59,23 @@
       </div>
     </section>
 
-    <!-- PRODUCTS -->
+    <!-- FILTER CONTROLS -->
+    <div class="controls" aria-hidden="false">
+      <input id="searchInput" class="search-input" type="search" placeholder="Search products (name or description)..." aria-label="Search products">
+      <select id="categorySelect" class="category-select" aria-label="Select category">
+        <option value="All">All Categories</option>
+        <option value="iPhones">iPhones</option>
+        <option value="MacBooks">MacBooks</option>
+        <option value="iPads">iPads</option>
+        <option value="Apple Watches">Apple Watches</option>
+        <option value="Accessories">Accessories</option>
+        <option value="Others">Others</option>
+      </select>
+    </div>
+
+    <div class="results-info" id="resultsInfo" aria-live="polite"></div>
+
+    <!-- PRODUCTS GRID -->
     <section id="products" class="products-section">
       <div class="section-inner">
         <h2>Featured Products</h2>
@@ -74,7 +100,6 @@
     </section>
   </main>
 
-  <!-- WhatsApp -->
   <a class="whatsapp-fab" href="https://wa.me/254720300388" target="_blank" rel="noopener" title="Chat with us on WhatsApp">💬</a>
 
   <footer class="site-footer">
@@ -84,13 +109,12 @@
     </div>
   </footer>
 
-  <!-- Firebase + logic -->
+  <!-- Firebase + filtering logic -->
   <script type="module">
-    // Firebase v11 imports
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
     import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-    // === Use corrected firebase config ===
+    // your firebase config (storageBucket corrected)
     const firebaseConfig = {
       apiKey: "AIzaSyCjf6QOf7gdq1StOBdf5zWtWyde-Gis0Nc",
       authDomain: "bm-trading-llp.firebaseapp.com",
@@ -104,109 +128,172 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // helpers
-    function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c])); }
-    function formatNumber(n){ return Number(n).toLocaleString(); }
+    // UI refs
+    const grid = document.getElementById('product-grid');
+    const noProductsEl = document.getElementById('no-products');
+    const searchInput = document.getElementById('searchInput');
+    const categorySelect = document.getElementById('categorySelect');
+    const resultsInfo = document.getElementById('resultsInfo');
 
-    // load products from Firestore
-    async function loadProducts(){
-      const grid = document.getElementById("product-grid");
-      const noProducts = document.getElementById("no-products");
-      grid.innerHTML = "";
+    // state
+    let allProducts = []; // loaded from Firestore
+    let filteredProducts = [];
+
+    // helpers
+    const esc = s => String(s || '').replace(/[&<>"']/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+    const num = n => (Number(n) || 0).toLocaleString();
+    const debounce = (fn, wait=250) => {
+      let t;
+      return (...args) => { clearTimeout(t); t = setTimeout(()=>fn(...args), wait); };
+    };
+
+    // fetch products from Firestore
+    async function fetchProducts(){
+      grid.innerHTML = '';
+      noProductsEl.style.display = 'none';
+      resultsInfo.textContent = 'Loading products...';
 
       try {
-        // try ordering by createdAt if present, fallback to document order
-        const q = query(collection(db, "products"), orderBy("createdAt", "desc"));
+        // try to order by createdAt if present
+        const q = query(collection(db, 'products'), orderBy('createdAt', 'desc'));
         const snap = await getDocs(q);
-
         if (snap.empty) {
-          noProducts.style.display = "block";
+          noProductsEl.style.display = 'block';
+          resultsInfo.textContent = '';
+          allProducts = [];
+          filteredProducts = [];
           return;
-        } else {
-          noProducts.style.display = "none";
         }
-
-        snap.forEach(doc => {
-          const data = doc.data();
-          const name = escapeHtml(data.name || "Unnamed");
-          const price = data.price ?? 0;
-          const image = data.imageURL || "https://via.placeholder.com/600x400?text=No+Image";
-          const desc = escapeHtml(data.description || "");
-
-          const card = document.createElement("article");
-          card.className = "product-card";
-          card.innerHTML = `
-            <div class="card-media"><img src="${image}" alt="${name}"></div>
-            <div class="card-body">
-              <h3 class="card-title">${name}</h3>
-              <p class="card-desc">${desc}</p>
-              <div class="card-footer">
-                <div class="price">KSh ${formatNumber(price)}</div>
-                <button class="add-cart" 
-                  data-id="${doc.id}"
-                  data-name="${name}"
-                  data-price="${price}"
-                  data-image="${image}">
-                  Add to Cart
-                </button>
-              </div>
-            </div>
-          `;
-          grid.appendChild(card);
+        allProducts = snap.docs.map(d => {
+          const data = d.data();
+          return {
+            id: d.id,
+            name: data.name || 'Unnamed',
+            price: data.price ?? 0,
+            imageURL: data.imageURL || data.image || 'https://via.placeholder.com/600x400?text=No+Image',
+            description: data.description || '',
+            category: data.category || 'Others',
+            createdAt: data.createdAt ? (data.createdAt.toDate ? data.createdAt.toDate() : data.createdAt) : null
+          };
         });
       } catch (err) {
-        console.error("Error loading products:", err);
-        grid.innerHTML = `<div class="load-error">Failed to load products. Check Firebase config & console.</div>`;
+        // fallback: try to get documents without ordering
+        console.warn('Ordering by createdAt failed; falling back to unordered fetch.', err);
+        try {
+          const snap2 = await getDocs(collection(db, 'products'));
+          allProducts = snap2.docs.map(d => {
+            const data = d.data();
+            return {
+              id: d.id,
+              name: data.name || 'Unnamed',
+              price: data.price ?? 0,
+              imageURL: data.imageURL || data.image || 'https://via.placeholder.com/600x400?text=No+Image',
+              description: data.description || '',
+              category: data.category || 'Others',
+              createdAt: null
+            };
+          });
+        } catch (e2) {
+          console.error('Failed to fetch products:', e2);
+          grid.innerHTML = `<div class="load-error">Failed to load products. Check Firebase console & config (see console).</div>`;
+          resultsInfo.textContent = '';
+          return;
+        }
       }
+
+      // initialize filteredProducts and render
+      filteredProducts = allProducts.slice();
+      renderProducts();
     }
 
-    // cart logic (localStorage)
-    function addToCart(product){
-      const cart = JSON.parse(localStorage.getItem("cart")) || [];
-      const existing = cart.find(i => i.id === product.id);
-      if (existing) {
-        existing.quantity = (existing.quantity || 1) + 1;
-      } else {
-        product.quantity = 1;
-        cart.push(product);
+    // render products to grid
+    function renderProducts(){
+      grid.innerHTML = '';
+      if(!filteredProducts.length){
+        noProductsEl.style.display = 'block';
+        resultsInfo.textContent = 'No results.';
+        return;
       }
-      localStorage.setItem("cart", JSON.stringify(cart));
-      // small toast-like feedback
-      const t = document.createElement("div");
-      t.className = "toast";
-      t.textContent = `${product.name} added to cart`;
-      document.body.appendChild(t);
-      setTimeout(()=> t.classList.add("show"), 10);
-      setTimeout(()=> { t.classList.remove("show"); setTimeout(()=>t.remove(),300); }, 2000);
+      noProductsEl.style.display = 'none';
+      resultsInfo.textContent = `${filteredProducts.length} product${filteredProducts.length>1 ? 's' : ''} found.`;
+
+      filteredProducts.forEach(p => {
+        const card = document.createElement('article');
+        card.className = 'product-card';
+        card.innerHTML = `
+          <div class="card-media"><img src="${esc(p.imageURL)}" alt="${esc(p.name)}"></div>
+          <div class="card-body">
+            <h3 class="card-title">${esc(p.name)}</h3>
+            <p class="card-desc">${esc(p.description)}</p>
+            <div class="card-footer">
+              <div class="price">KSh ${num(p.price)}</div>
+              <button class="add-cart" 
+                data-id="${p.id}"
+                data-name="${esc(p.name)}"
+                data-price="${p.price}"
+                data-image="${esc(p.imageURL)}"
+                data-category="${esc(p.category)}">
+                Add to Cart
+              </button>
+            </div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
     }
 
-    // delegate add-cart clicks
-    document.addEventListener("click", (e) => {
-      if (e.target.classList.contains("add-cart")) {
-        const dataset = e.target.dataset;
-        addToCart({
-          id: dataset.id,
-          name: dataset.name,
-          price: Number(dataset.price),
-          image: dataset.image
-        });
+    // apply search & category filters
+    function applyFilters(){
+      const term = searchInput.value.trim().toLowerCase();
+      const cat = categorySelect.value;
+
+      filteredProducts = allProducts.filter(p => {
+        const inCategory = (cat === 'All') ? true : ( (p.category || 'Others') === cat );
+        if(!inCategory) return false;
+        if(!term) return true;
+        // match name or description
+        return p.name.toLowerCase().includes(term) || p.description.toLowerCase().includes(term);
+      });
+
+      renderProducts();
+    }
+
+    // debounce search input
+    const debouncedApply = debounce(applyFilters, 200);
+    searchInput.addEventListener('input', debouncedApply);
+    categorySelect.addEventListener('change', applyFilters);
+
+    // add to cart delegation (same behavior)
+    document.addEventListener('click', (e) => {
+      if(e.target.classList.contains('add-cart')){
+        const ds = e.target.dataset;
+        const product = {
+          id: ds.id,
+          name: ds.name,
+          price: Number(ds.price),
+          imageURL: ds.image,
+          category: ds.category,
+          quantity: 1
+        };
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        const existing = cart.find(i => i.id === product.id);
+        if(existing) existing.quantity = (existing.quantity || 1) + 1;
+        else cart.push(product);
+        localStorage.setItem('cart', JSON.stringify(cart));
+
+        // toast feedback
+        const t = document.createElement('div');
+        t.className = 'toast';
+        t.textContent = `${product.name} added to cart`;
+        document.body.appendChild(t);
+        setTimeout(()=> t.classList.add('show'), 10);
+        setTimeout(()=> { t.classList.remove('show'); setTimeout(()=> t.remove(), 300); }, 2000);
       }
     });
 
-    // set current year
-    document.getElementById("year").textContent = new Date().getFullYear();
-
-    // initialize
-    loadProducts();
-    button.addEventListener("click", () => {
-  const item = { name: data.name, price: data.price, imageURL: data.imageURL };
-  let cart = JSON.parse(localStorage.getItem("cart")) || [];
-  cart.push(item);
-  localStorage.setItem("cart", JSON.stringify(cart));
-  alert("Added to cart!");
-});
-
+    // init
+    document.getElementById('year').textContent = new Date().getFullYear();
+    fetchProducts();
   </script>
 </body>
 </html>
-
