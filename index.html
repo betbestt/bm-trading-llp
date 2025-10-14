@@ -116,6 +116,25 @@
 
     // load on start
     loadProducts();
+    // CART SYSTEM
+document.addEventListener("click", function(e) {
+  if (e.target.classList.contains("add-cart")) {
+    const card = e.target.closest(".product");
+    const name = card.querySelector("h3").textContent;
+    const price = card.querySelector(".price").textContent.replace("KSh ", "").replace(",", "");
+    const image = card.querySelector("img").src;
+    addToCart({ name, price, image });
+  }
+});
+
+function addToCart(product) {
+  let cart = JSON.parse(localStorage.getItem("cart")) || [];
+  cart.push(product);
+  localStorage.setItem("cart", JSON.stringify(cart));
+  alert(`${product.name} added to cart!`);
+}
+
   </script>
 </body>
 </html>
+
