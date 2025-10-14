@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Your Cart - B&M Trading LLP</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
+    th { background: #f0f0f0; }
+    img { width: 60px; height: 60px; object-fit: cover; }
+    .total { font-weight: bold; margin-top: 20px; text-align: right; }
+    .btn { background: #007bff; color: white; padding: 10px 15px; border: none; cursor: pointer; border-radius: 5px; }
+    .btn:hover { background: #0056b3; }
+  </style>
+</head>
+<body>
+  <h2>Your Shopping Cart</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Image</th>
+        <th>Name</th>
+        <th>Qty</th>
+        <th>Price</th>
+        <th>Total</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody id="cart-body"></tbody>
+  </table>
+  <p class="total" id="cart-total"></p>
+  <button class="btn" id="checkout">Proceed to Checkout</button>
+
+  <script>
+    function loadCart() {
+      let cart = JSON.parse(localStorage.getItem("cart")) || [];
+      const body = document.getElementById("cart-body");
+      const totalElem = document.getElementById("cart-total");
+      body.innerHTML = "";
+      let total = 0;
+
+      cart.forEach((item, index) => {
+        const itemTotal = item.price * item.quantity;
+        total += itemTotal;
+        body.innerHTML += `
+          <tr>
+            <td><img src="${item.image}" alt="${item.name}"></td>
+            <td>${item.name}</td>
+            <td>${item.quantity}</td>
+            <td>KSh ${item.price}</td>
+            <td>KSh ${itemTotal}</td>
+            <td><button class="btn remove" data-index="${index}">Remove</button></td>
+          </tr>
+        `;
+      });
+
+      totalElem.textContent = "Grand Total: KSh " + total.toLocaleString();
+    }
+
+    document.addEventListener("click", (e) => {
+      if (e.target.classList.contains("remove")) {
+        let cart = JSON.parse(localStorage.getItem("cart")) || [];
+        cart.splice(e.target.dataset.index, 1);
+        localStorage.setItem("cart", JSON.stringify(cart));
+        loadCart();
+      }
+    });
+
+    document.getElementById("checkout").addEventListener("click", () => {
+      window.location.href = "checkout.html";
+    });
+
+    loadCart();
+  </script>
+</body>
+</html>
