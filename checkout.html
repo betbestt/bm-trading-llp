@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout | B&M Trading LLP</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .cart-item { display:flex; align-items:center; gap:10px; margin:10px 0; }
+    .cart-item img { width:80px; height:80px; border-radius:8px; object-fit:cover; }
+    .cart-item h4 { margin:0; flex:1; }
+    .total { font-weight:bold; margin-top:20px; }
+  </style>
+</head>
+<body style="padding:20px;">
+  <h2>Checkout</h2>
+  <div id="cart-items"></div>
+  <p class="total" id="cart-total"></p>
+
+  <h3>Customer Info</h3>
+  <form id="orderForm">
+    <input type="text" id="name" placeholder="Full Name" required><br>
+    <input type="text" id="phone" placeholder="Phone Number" required><br>
+    <input type="text" id="address" placeholder="Delivery Address" required><br>
+    <button type="submit">Place Order</button>
+  </form>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCjf6QOf7gdq1StOBdf5zWtWyde-Gis0Nc",
+      authDomain: "bm-trading-llp.firebaseapp.com",
+      projectId: "bm-trading-llp",
+      storageBucket: "bm-trading-llp.firebasestorage.app",
+      messagingSenderId: "760421393441",
+      appId: "1:760421393441:web:bda19fd259add66b892f60",
+      measurementId: "G-FXSZ8BFMK2"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const cartContainer = document.getElementById("cart-items");
+    const totalEl = document.getElementById("cart-total");
+    const cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+    let total = 0;
+    cart.forEach(item => {
+      const div = document.createElement("div");
+      div.classList.add("cart-item");
+      div.innerHTML = `
+        <img src="${item.image}">
+        <h4>${item.name}</h4>
+        <p>KSh ${Number(item.price).toLocaleString()}</p>
+      `;
+      cartContainer.appendChild(div);
+      total += Number(item.price);
+    });
+    totalEl.textContent = `Total: KSh ${total.toLocaleString()}`;
+
+    document.getElementById("orderForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const name = document.getElementById("name").value.trim();
+      const phone = document.getElementById("phone").value.trim();
+      const address = document.getElementById("address").value.trim();
+
+      if (!cart.length) return alert("Cart is empty!");
+
+      try {
+        await addDoc(collection(db, "orders"), {
+          name, phone, address,
+          items: cart,
+          total,
+          createdAt: serverTimestamp()
+        });
+        alert("Order placed successfully! We’ll contact you shortly.");
+        localStorage.removeItem("cart");
+        window.location.href = "index.html";
+      } catch (err) {
+        console.error(err);
+        alert("Failed to place order!");
+      }
+    });
+  </script>
+</body>
+</html>
