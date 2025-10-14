@@ -2,26 +2,28 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Checkout | B&M Trading LLP</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Checkout - B&M Trading LLP</title>
   <style>
-    .cart-item { display:flex; align-items:center; gap:10px; margin:10px 0; }
-    .cart-item img { width:80px; height:80px; border-radius:8px; object-fit:cover; }
-    .cart-item h4 { margin:0; flex:1; }
-    .total { font-weight:bold; margin-top:20px; }
+    body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: #fafafa; }
+    form { max-width: 500px; margin: 30px auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+    input, textarea { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 5px; }
+    button { background: #007bff; color: #fff; border: none; padding: 12px; border-radius: 5px; cursor: pointer; width: 100%; }
+    button:hover { background: #0056b3; }
+    h2 { text-align: center; }
   </style>
 </head>
-<body style="padding:20px;">
+<body>
   <h2>Checkout</h2>
-  <div id="cart-items"></div>
-  <p class="total" id="cart-total"></p>
+  <form id="checkoutForm">
+    <label>Full Name</label>
+    <input type="text" id="name" required>
 
-  <h3>Customer Info</h3>
-  <form id="orderForm">
-    <input type="text" id="name" placeholder="Full Name" required><br>
-    <input type="text" id="phone" placeholder="Phone Number" required><br>
-    <input type="text" id="address" placeholder="Delivery Address" required><br>
+    <label>Phone Number</label>
+    <input type="tel" id="phone" required>
+
+    <label>Delivery Address</label>
+    <textarea id="address" required></textarea>
+
     <button type="submit">Place Order</button>
   </form>
 
@@ -38,58 +40,49 @@
       appId: "1:760421393441:web:bda19fd259add66b892f60",
       measurementId: "G-FXSZ8BFMK2"
     };
+
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    const cartContainer = document.getElementById("cart-items");
-    const totalEl = document.getElementById("cart-total");
-    const cart = JSON.parse(localStorage.getItem("cart")) || [];
+    const form = document.getElementById("checkoutForm");
 
-    let total = 0;
-    cart.forEach(item => {
-      const div = document.createElement("div");
-      div.classList.add("cart-item");
-      div.innerHTML = `
-        <img src="${item.image}">
-        <h4>${item.name}</h4>
-        <p>KSh ${Number(item.price).toLocaleString()}</p>
-      `;
-      cartContainer.appendChild(div);
-      total += Number(item.price);
-    });
-    totalEl.textContent = `Total: KSh ${total.toLocaleString()}`;
-
-    document.getElementById("orderForm").addEventListener("submit", async (e) => {
+    form.addEventListener("submit", async (e) => {
       e.preventDefault();
-      const name = document.getElementById("name").value.trim();
-      const phone = document.getElementById("phone").value.trim();
-      const address = document.getElementById("address").value.trim();
+      const name = document.getElementById("name").value;
+      const phone = document.getElementById("phone").value;
+      const address = document.getElementById("address").value;
+      const cart = JSON.parse(localStorage.getItem("cart")) || [];
 
-      if (!cart.length) return alert("Cart is empty!");
+      if (cart.length === 0) {
+        alert("Your cart is empty!");
+        return;
+      }
+
+      const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
       try {
         await addDoc(collection(db, "orders"), {
-          name, phone, address,
-          items: cart,
+          name,
+          phone,
+          address,
+          cart,
           total,
           createdAt: serverTimestamp()
         });
-        alert("Order placed successfully! We’ll contact you shortly.");
 
-// Send WhatsApp message (to your business number)
-const message = encodeURIComponent(
-  `🛍️ New Order Received!\n\nName: ${name}\nPhone: ${phone}\nAddress: ${address}\nTotal: KSh ${total.toLocaleString()}\n\nPlease check your admin dashboard for details.`
-);
-const whatsappURL = `https://wa.me/254720300388?text=${message}`;
+        // Send WhatsApp notification
+        const message = encodeURIComponent(
+          `🛍️ New Order from ${name}\n📞 ${phone}\n🏠 ${address}\n\nTotal: KSh ${total.toLocaleString()}\n\nThank you for shopping with B&M Trading LLP!`
+        );
+        const whatsappNumber = "254720300388";
+        window.open(`https://wa.me/${whatsappNumber}?text=${message}`, "_blank");
 
-// Clear cart and redirect to WhatsApp
-localStorage.removeItem("cart");
-window.open(whatsappURL, "_blank");
-window.location.href = "index.html";
-
+        alert("Order placed successfully!");
+        localStorage.removeItem("cart");
+        window.location.href = "index.html";
       } catch (err) {
-        console.error(err);
-        alert("Failed to place order!");
+        console.error("Error saving order:", err);
+        alert("Failed to place order. Please try again.");
       }
     });
   </script>
