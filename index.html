@@ -5,93 +5,97 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>B&M Trading LLP — Shop</title>
   <link rel="stylesheet" href="style.css">
-  <style>
-    body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; background: #fafafa; color: #222; }
-    header, .top-bar, footer { background: #111; color: #fff; text-align: center; padding: 10px 0; }
-    header { display: flex; justify-content: space-between; align-items: center; padding: 15px 30px; }
-    header .logo { font-size: 1.5em; font-weight: bold; }
-    header nav a { color: #fff; text-decoration: none; margin: 0 10px; }
-    header nav a:hover { text-decoration: underline; }
-    .hero { background: url('https://images.unsplash.com/photo-1606813902913-831d3d0e49d4?auto=format&fit=crop&w=1950&q=80') center/cover; color: #fff; text-align: center; padding: 100px 20px; }
-    .hero h1 { font-size: 2em; margin-bottom: 10px; }
-    .hero .btn { background: #ff6a00; color: #fff; padding: 12px 20px; border-radius: 5px; text-decoration: none; font-weight: bold; }
-    .offer { background: #ff6a00; color: #fff; padding: 10px; text-align: center; font-weight: 500; }
-    .products { padding: 40px 20px; max-width: 1200px; margin: auto; }
-    .products h2 { text-align: center; margin-bottom: 20px; }
-    .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
-    .product { background: #fff; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-align: center; padding: 15px; }
-    .product-thumb img { width: 100%; height: 200px; object-fit: cover; border-radius: 8px; }
-    .product h3 { margin: 10px 0; font-size: 1.1em; }
-    .price { color: #ff6a00; font-weight: bold; }
-    .add-cart { background: #007bff; color: #fff; border: none; padding: 8px 12px; cursor: pointer; border-radius: 5px; margin-top: 10px; }
-    .add-cart:hover { background: #0056b3; }
-    .about, .contact { padding: 40px 20px; max-width: 1000px; margin: auto; }
-    .whatsapp { position: fixed; bottom: 15px; right: 15px; background: #25D366; color: white; padding: 12px 15px; border-radius: 50px; text-decoration: none; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
-    footer p { margin: 0; font-size: 0.9em; }
-  </style>
 </head>
 <body>
-  <div class="top-bar">
-    <p>Seen it cheaper? Ask for a B&M Trading deal. <a href="#" style="color:#ff6a00;">Live chat</a> or call <strong>0720 300 388</strong></p>
-  </div>
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="brand">
+        <div class="logo">B&amp;M Trading LLP</div>
+        <div class="tag">Premium Apple Products — Nairobi</div>
+      </div>
 
-  <header>
-    <div class="logo">B&M Trading LLP</div>
-    <nav>
-      <a href="index.html">Home</a>
-      <a href="add-product.html">Add Product</a>
-      <a href="cart.html">🛒 Cart</a>
-    </nav>
+      <nav class="main-nav">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="add-product.html" class="nav-link">Add Product</a>
+        <a href="cart.html" class="nav-link cart-link">Cart</a>
+      </nav>
+    </div>
   </header>
 
-  <section class="hero">
-    <div class="hero-content">
-      <h1>The Latest Apple & Tech Products</h1>
-      <p>Shop premium iPhones, MacBooks and accessories in Nairobi.</p>
-      <a href="#products" class="btn">Shop Now</a>
+  <main>
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-inner">
+        <div class="hero-content">
+          <h1>The Latest Apple &amp; Tech Products</h1>
+          <p class="lead">Shop premium iPhones, MacBooks and accessories — genuine products, local warranty.</p>
+          <div class="hero-actions">
+            <a href="#products" class="btn btn-primary">Shop Trending</a>
+            <a href="contact.html" class="btn btn-ghost">Store Info</a>
+          </div>
+        </div>
+        <div class="hero-image" aria-hidden="true">
+          <!-- decorative image -->
+        </div>
+      </div>
+    </section>
+
+    <!-- PROMO BAR -->
+    <section class="promo-bar">
+      <div class="promo-inner">
+        <span>Free delivery for orders above <strong>KSh 20,000</strong></span>
+        <span class="promo-sep">|</span>
+        <span>Secure payments • Genuine products</span>
+      </div>
+    </section>
+
+    <!-- PRODUCTS -->
+    <section id="products" class="products-section">
+      <div class="section-inner">
+        <h2>Featured Products</h2>
+        <div id="product-grid" class="product-grid" aria-live="polite"></div>
+        <p id="no-products" class="no-products" style="display:none;">No products yet — add some from the Add Product page.</p>
+      </div>
+    </section>
+
+    <!-- ABOUT -->
+    <section class="about-section">
+      <div class="section-inner about-inner">
+        <div>
+          <h3>About B&amp;M Trading</h3>
+          <p>We are a trusted electronics retailer based in Nairobi — specialising in authentic Apple devices and accessories. Visit us at Queensway House, Kaunda Street.</p>
+        </div>
+        <div>
+          <h3>Contact</h3>
+          <p><strong>Phone:</strong> 0720 300 388</p>
+          <p><strong>Address:</strong> Queensway House, Kaunda St, Nairobi</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- WhatsApp -->
+  <a class="whatsapp-fab" href="https://wa.me/254720300388" target="_blank" rel="noopener" title="Chat with us on WhatsApp">💬</a>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div>© <span id="year"></span> B&amp;M Trading LLP</div>
+      <div>Built with care — Nairobi</div>
     </div>
-  </section>
-
-  <section class="offer">
-    <h2>FREE Delivery On All Orders Above KSh 20,000</h2>
-  </section>
-
-  <section id="products" class="products">
-    <h2>Trending Now</h2>
-    <div id="product-grid" class="product-grid"></div>
-    <p id="no-products" style="display:none;text-align:center;color:#666;">No products yet — add some from the Add Product page.</p>
-  </section>
-
-  <section id="about" class="about">
-    <h2>About B&M Trading LLP</h2>
-    <p>We are a trusted electronics company based in Nairobi, dealing in authentic Apple products and accessories. Visit us at Queensway House, Kaunda Street.</p>
-  </section>
-
-  <section id="contact" class="contact">
-    <h2>Contact Us</h2>
-    <p><strong>Address:</strong> Queensway House, Kaunda St, Nairobi</p>
-    <p><strong>Phone:</strong> 0720 300 388</p>
-    <iframe src="https://www.google.com/maps?q=Queensway+House,+Nairobi&output=embed" width="100%" height="250" style="border:0;"></iframe>
-  </section>
-
-  <a href="https://wa.me/254720300388" class="whatsapp" target="_blank" rel="noopener">💬 WhatsApp Us</a>
-
-  <footer>
-    <p>© 2025 B&M Trading LLP | All Rights Reserved</p>
   </footer>
 
-  <!-- Firebase + App logic -->
+  <!-- Firebase + logic -->
   <script type="module">
-    // Firebase imports
+    // Firebase v11 imports
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
     import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-    // Your Firebase config
+    // === Use corrected firebase config ===
     const firebaseConfig = {
       apiKey: "AIzaSyCjf6QOf7gdq1StOBdf5zWtWyde-Gis0Nc",
       authDomain: "bm-trading-llp.firebaseapp.com",
       projectId: "bm-trading-llp",
-      storageBucket: "bm-trading-llp.firebasestorage.app",
+      storageBucket: "bm-trading-llp.appspot.com",
       messagingSenderId: "760421393441",
       appId: "1:760421393441:web:bda19fd259add66b892f60",
       measurementId: "G-FXSZ8BFMK2"
@@ -100,16 +104,18 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // Helper functions
-    function formatNumber(n){ try { return Number(n).toLocaleString(); } catch(e){ return n; } }
+    // helpers
     function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c])); }
+    function formatNumber(n){ return Number(n).toLocaleString(); }
 
-    async function loadProducts() {
+    // load products from Firestore
+    async function loadProducts(){
       const grid = document.getElementById("product-grid");
       const noProducts = document.getElementById("no-products");
       grid.innerHTML = "";
 
       try {
+        // try ordering by createdAt if present, fallback to document order
         const q = query(collection(db, "products"), orderBy("createdAt", "desc"));
         const snap = await getDocs(q);
 
@@ -122,55 +128,76 @@
 
         snap.forEach(doc => {
           const data = doc.data();
-          const div = document.createElement("div");
-          div.className = "product";
-          div.innerHTML = `
-            <div class="product-thumb"><img src="${data.imageURL}" alt="${escapeHtml(data.name)}"></div>
-            <h3>${escapeHtml(data.name)}</h3>
-            <p class="price">KSh ${formatNumber(data.price)}</p>
-            <button class="add-cart"
-              data-id="${doc.id}"
-              data-name="${escapeHtml(data.name)}"
-              data-price="${data.price}"
-              data-image="${data.imageURL}">
-              Add to Cart
-            </button>
+          const name = escapeHtml(data.name || "Unnamed");
+          const price = data.price ?? 0;
+          const image = data.imageURL || "https://via.placeholder.com/600x400?text=No+Image";
+          const desc = escapeHtml(data.description || "");
+
+          const card = document.createElement("article");
+          card.className = "product-card";
+          card.innerHTML = `
+            <div class="card-media"><img src="${image}" alt="${name}"></div>
+            <div class="card-body">
+              <h3 class="card-title">${name}</h3>
+              <p class="card-desc">${desc}</p>
+              <div class="card-footer">
+                <div class="price">KSh ${formatNumber(price)}</div>
+                <button class="add-cart" 
+                  data-id="${doc.id}"
+                  data-name="${name}"
+                  data-price="${price}"
+                  data-image="${image}">
+                  Add to Cart
+                </button>
+              </div>
+            </div>
           `;
-          grid.appendChild(div);
+          grid.appendChild(card);
         });
       } catch (err) {
         console.error("Error loading products:", err);
-        grid.innerHTML = "<p style='color:red'>Failed to load products.</p>";
+        grid.innerHTML = `<div class="load-error">Failed to load products. Check Firebase config & console.</div>`;
       }
     }
 
-    // Add to Cart functionality
+    // cart logic (localStorage)
+    function addToCart(product){
+      const cart = JSON.parse(localStorage.getItem("cart")) || [];
+      const existing = cart.find(i => i.id === product.id);
+      if (existing) {
+        existing.quantity = (existing.quantity || 1) + 1;
+      } else {
+        product.quantity = 1;
+        cart.push(product);
+      }
+      localStorage.setItem("cart", JSON.stringify(cart));
+      // small toast-like feedback
+      const t = document.createElement("div");
+      t.className = "toast";
+      t.textContent = `${product.name} added to cart`;
+      document.body.appendChild(t);
+      setTimeout(()=> t.classList.add("show"), 10);
+      setTimeout(()=> { t.classList.remove("show"); setTimeout(()=>t.remove(),300); }, 2000);
+    }
+
+    // delegate add-cart clicks
     document.addEventListener("click", (e) => {
       if (e.target.classList.contains("add-cart")) {
-        const product = {
-          id: e.target.dataset.id,
-          name: e.target.dataset.name,
-          price: parseFloat(e.target.dataset.price),
-          image: e.target.dataset.image,
-          quantity: 1
-        };
-
-        let cart = JSON.parse(localStorage.getItem("cart")) || [];
-        const existing = cart.find(item => item.id === product.id);
-
-        if (existing) {
-          existing.quantity++;
-        } else {
-          cart.push(product);
-        }
-
-        localStorage.setItem("cart", JSON.stringify(cart));
-        alert(`${product.name} added to cart!`);
+        const dataset = e.target.dataset;
+        addToCart({
+          id: dataset.id,
+          name: dataset.name,
+          price: Number(dataset.price),
+          image: dataset.image
+        });
       }
     });
 
+    // set current year
+    document.getElementById("year").textContent = new Date().getFullYear();
+
+    // initialize
     loadProducts();
   </script>
 </body>
 </html>
-
