@@ -5,48 +5,69 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Add Product — B&M Trading LLP</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    main{ max-width:600px; margin:50px auto; background:var(--bg); padding:30px; border-radius:16px; box-shadow:var(--card-shadow); }
+    h1{ text-align:center; margin-bottom:24px; }
+    form{ display:flex; flex-direction:column; gap:16px; }
+    input,textarea{ padding:12px; border-radius:8px; border:1px solid #d1d5db; font-size:15px; width:100%; }
+    input[type=file]{ padding:8px; }
+    button{ padding:12px; border:none; border-radius:8px; background:var(--accent); color:white; font-weight:700; cursor:pointer; }
+    button:hover{ background:var(--accent-dark); }
+    .logout-btn{ text-align:center; margin-top:10px; cursor:pointer; color:var(--muted-text); text-decoration:underline; }
+    #preview img{ width:100%; max-height:240px; object-fit:cover; border-radius:10px; margin-top:10px; }
+    .hidden{ display:none; }
+    .back-home{ position:fixed; left:20px; bottom:20px; background:var(--accent); color:white; padding:12px 16px; border-radius:8px; text-decoration:none; font-weight:700; box-shadow:var(--card-shadow); }
+  </style>
 </head>
 <body>
-    <script>
-  if (localStorage.getItem("isAdmin") !== "true") {
-    alert("Access denied! Only the owner can add products.");
-    window.location.href = "login.html";
-  }
-</script>
-
-  <header>
-    <div class="logo">B&M Trading LLP</div>
-    <a href="orders.html">Orders</a>
-
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="brand"><div class="logo">B&amp;M Trading LLP</div></div>
+    </div>
   </header>
 
-  <main class="form">
-    <h2>Add New Product</h2>
+  <main>
+    <!-- Admin Login -->
+    <div id="login-section">
+      <h1>Admin Login</h1>
+      <input type="text" id="adminPhone" placeholder="Phone number (e.g. 0720300388)">
+      <input type="password" id="adminPassword" placeholder="Password">
+      <button id="loginBtn">Login</button>
+    </div>
 
-    <form id="productForm">
-      <input id="name" name="name" type="text" placeholder="Product name" required />
-      <input id="price" name="price" type="number" placeholder="Price (KSh)" min="0" required />
-      <input id="image" name="image" type="file" accept="image/*" required />
-      <button id="uploadBtn" type="submit">Upload Product</button>
-    </form>
-
-    <p id="status" style="text-align:center;color:#333;"></p>
-    <p style="text-align:center;color:#777;font-size:13px;margin-top:12px;">
-      Tip: keep this page private. You can unlink it from navigation later or add auth protection.
-    </p>
+    <!-- Product Upload -->
+    <div id="upload-section" class="hidden">
+      <h1>Add Product</h1>
+      <form id="productForm">
+        <input type="text" id="name" placeholder="Product Name" required>
+        <input type="number" id="price" placeholder="Price (KSh)" required>
+        <textarea id="description" placeholder="Product Description" rows="3"></textarea>
+        <input type="file" id="image" accept="image/*" required>
+        <div id="preview"></div>
+        <button type="submit">Upload Product</button>
+      </form>
+      <div class="logout-btn" id="logoutBtn">Logout</div>
+    </div>
   </main>
+
+  <a href="index.html" class="back-home">← Back Home</a>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div>© <span id="year"></span> B&amp;M Trading LLP</div>
+    </div>
+  </footer>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
     import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-    import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 
-    // ←—— YOUR firebaseConfig (provided by you) ———→
     const firebaseConfig = {
       apiKey: "AIzaSyCjf6QOf7gdq1StOBdf5zWtWyde-Gis0Nc",
       authDomain: "bm-trading-llp.firebaseapp.com",
       projectId: "bm-trading-llp",
-      storageBucket: "bm-trading-llp.firebasestorage.app",
+      storageBucket: "bm-trading-llp.appspot.com",
       messagingSenderId: "760421393441",
       appId: "1:760421393441:web:bda19fd259add66b892f60",
       measurementId: "G-FXSZ8BFMK2"
@@ -56,72 +77,97 @@
     const db = getFirestore(app);
     const storage = getStorage(app);
 
-    const form = document.getElementById("productForm");
-    const status = document.getElementById("status");
-    const uploadBtn = document.getElementById("uploadBtn");
+    const loginSection = document.getElementById('login-section');
+    const uploadSection = document.getElementById('upload-section');
+    const loginBtn = document.getElementById('loginBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const adminPhoneInput = document.getElementById('adminPhone');
+    const adminPasswordInput = document.getElementById('adminPassword');
+    const previewDiv = document.getElementById('preview');
+    const productForm = document.getElementById('productForm');
 
-    form.addEventListener("submit", async (e) => {
+    const ADMIN_PHONE = "0720300388";
+    const ADMIN_PASS = "Brian";
+
+    // Simple login system (local)
+    if(localStorage.getItem("adminLoggedIn") === "true"){
+      loginSection.classList.add("hidden");
+      uploadSection.classList.remove("hidden");
+    }
+
+    loginBtn.addEventListener('click', ()=>{
+      const phone = adminPhoneInput.value.trim();
+      const pass = adminPasswordInput.value.trim();
+
+      if(phone === ADMIN_PHONE && pass === ADMIN_PASS){
+        localStorage.setItem("adminLoggedIn", "true");
+        loginSection.classList.add("hidden");
+        uploadSection.classList.remove("hidden");
+        toast("Welcome admin!");
+      }else{
+        toast("Invalid credentials!");
+      }
+    });
+
+    logoutBtn.addEventListener('click', ()=>{
+      localStorage.removeItem("adminLoggedIn");
+      location.reload();
+    });
+
+    // Preview selected image
+    document.getElementById("image").addEventListener("change", (e)=>{
+      const file = e.target.files[0];
+      if(file){
+        const reader = new FileReader();
+        reader.onload = ev => {
+          previewDiv.innerHTML = `<img src="${ev.target.result}" alt="Preview">`;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Submit product
+    productForm.addEventListener("submit", async (e)=>{
       e.preventDefault();
-      status.style.color = "#333";
-      status.textContent = "Preparing upload...";
+      const name = document.getElementById("name").value.trim();
+      const price = parseFloat(document.getElementById("price").value);
+      const description = document.getElementById("description").value.trim();
+      const file = document.getElementById("image").files[0];
 
-      const name = form.name.value.trim();
-      const price = Number(form.price.value);
-      const file = form.image.files[0];
-
-      if (!name || !file || isNaN(price)) {
-        status.style.color = "red";
-        status.textContent = "Please provide valid name, price and image.";
+      if(!name || !price || !file){
+        toast("Please fill all fields!");
         return;
       }
 
-      try {
-        uploadBtn.disabled = true;
-        status.textContent = "Uploading image...";
+      try{
+        const storageRef = ref(storage, `products/${Date.now()}_${file.name}`);
+        await uploadBytes(storageRef, file);
+        const imageURL = await getDownloadURL(storageRef);
 
-        // create unique filename: timestamp_originalname
-        const filename = `${Date.now()}_${file.name.replace(/\s+/g,'_')}`;
-        const storageRef = ref(storage, `products/${filename}`);
-        const uploadTask = uploadBytesResumable(storageRef, file);
+        await addDoc(collection(db, "products"), {
+          name, price, description, imageURL, createdAt: serverTimestamp()
+        });
 
-        uploadTask.on('state_changed',
-          (snapshot) => {
-            const pct = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
-            status.textContent = `Uploading image: ${pct}%`;
-          },
-          (err) => {
-            console.error("Upload error:", err);
-            status.style.color = "red";
-            status.textContent = "Image upload failed.";
-            uploadBtn.disabled = false;
-          },
-          async () => {
-            // upload complete -> get URL
-            const imageURL = await getDownloadURL(uploadTask.snapshot.ref);
-
-            status.textContent = "Saving product data...";
-            // add doc to Firestore with createdAt timestamp
-            await addDoc(collection(db, "products"), {
-              name,
-              price,
-              imageURL,
-              createdAt: serverTimestamp()
-            });
-
-            status.style.color = "green";
-            status.textContent = "✅ Product added successfully!";
-            form.reset();
-            uploadBtn.disabled = false;
-          }
-        );
-      } catch (err) {
+        productForm.reset();
+        previewDiv.innerHTML = "";
+        toast("Product added successfully!");
+      }catch(err){
         console.error(err);
-        status.style.color = "red";
-        status.textContent = "Failed to add product.";
-        uploadBtn.disabled = false;
+        toast("Error adding product!");
       }
     });
+
+    // Toast helper
+    function toast(msg){
+      const t = document.createElement("div");
+      t.className = "toast";
+      t.textContent = msg;
+      document.body.appendChild(t);
+      setTimeout(()=> t.classList.add("show"), 10);
+      setTimeout(()=> { t.classList.remove("show"); setTimeout(()=>t.remove(),300); }, 2000);
+    }
+
+    document.getElementById("year").textContent = new Date().getFullYear();
   </script>
 </body>
 </html>
-
