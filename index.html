@@ -5,254 +5,112 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>B&M Trading LLP — Shop</title>
   <link rel="stylesheet" href="style.css">
-  <style>
-    /* Small additions for search/filter UI inside the page (keeps main style) */
-    .controls { max-width:1200px; margin:18px auto; display:flex; gap:12px; align-items:center; padding:0 18px; }
-    .search-input { flex:1; min-width:180px; padding:10px 14px; border-radius:10px; border:1px solid #e6e9ef; background:#fff; }
-    .category-select { padding:10px 14px; border-radius:10px; border:1px solid #e6e9ef; background:#fff; font-weight:700; }
-    .filters-row { display:flex; gap:12px; align-items:center; justify-content:center; margin-bottom:6px; }
-    .chip { padding:8px 12px; border-radius:999px; background:#f1f5f9; cursor:pointer; color:#374151; font-weight:600; border:1px solid transparent; }
-    .chip.active { background:var(--accent); color:#fff; border-color:var(--accent-dark); box-shadow:0 6px 18px rgba(13,110,253,0.08); }
-    .results-info { max-width:1200px; margin:6px auto 0; padding:0 18px; color:var(--muted-text); font-weight:600; }
-    @media (max-width:680px){ .controls{ flex-direction:column; align-items:stretch; } .hero-inner{grid-template-columns:1fr} }
-  </style>
 </head>
 <body>
-  <!-- 🌐 NAVBAR START -->
-<nav class="w-full bg-white shadow-sm fixed top-0 left-0 z-50">
-  <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
-    <a href="index.html" class="text-xl font-semibold text-gray-900 tracking-tight">
-      B&M Trading LLP
-    </a>
-    <div class="space-x-6 text-gray-700 font-medium">
-      <a href="index.html" class="hover:text-black">Home</a>
-      <a href="cart.html" class="hover:text-black">Cart</a>
-      <a href="checkout.html" class="hover:text-black">Checkout</a>
-    </div>
-  </div>
-</nav>
-
-<!-- Add margin top to push page content below navbar -->
-<div class="mt-20"></div>
-<!-- 🌐 NAVBAR END -->
-
-  <header class="site-header">
-    <div class="header-inner">
-      <div class="brand">
-        <div class="logo">B&amp;M Trading LLP</div>
-        <div class="tag">Premium Apple Products — Nairobi</div>
+  <!-- NAVBAR -->
+  <header class="navbar">
+    <div class="navbar-inner">
+      <div class="brand">B&M Trading LLP</div>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="add-product.html">Admin</a>
+        <a href="cart.html">Cart</a>
+        <a href="store-info.html">Store Info</a>
       </div>
-
-      <nav class="main-nav">
-        <a href="index.html" class="nav-link">Home</a>
-        <a href="add-product.html" class="nav-link">Add Product</a>
-        <a href="cart.html" class="nav-link">Cart</a>
-        <a href="orders.html" class="nav-link">Orders</a>
-      </nav>
     </div>
   </header>
+  <div style="height:64px;"></div>
 
-  <main>
-    <!-- HERO (same clean Apple style) -->
-    <section class="hero">
-      <div class="hero-inner">
-        <div class="hero-content">
-          <h1>The Latest Apple &amp; Tech Products</h1>
-          <p class="lead">Shop premium iPhones, MacBooks and accessories — genuine products, local warranty.</p>
-          <div class="hero-actions">
-            <a href="#products" class="btn btn-primary">Shop Trending</a>
-            <a href="store-info.html" class="btn btn-ghost">Store Info</a>
-          </div>
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="hero-content container">
+        <h1>The Latest Apple &amp; Tech Products</h1>
+        <p class="lead">Shop premium iPhones, MacBooks and accessories — genuine products, local warranty.</p>
+        <div style="margin-top:18px;">
+          <a href="#products" class="add-cart" style="background:#ffb400;padding:10px 16px;border-radius:8px;color:#111;text-decoration:none;">Shop Trending</a>
         </div>
-        <div class="hero-image" aria-hidden="true"></div>
       </div>
-    </section>
-
-    <!-- PROMO BAR -->
-    <section class="promo-bar">
-      <div class="promo-inner">
-        <span>Free delivery for orders above <strong>KSh 20,000</strong></span>
-        <span class="promo-sep">|</span>
-        <span>Secure payments • Genuine products</span>
-      </div>
-    </section>
-
-    <!-- FILTER CONTROLS -->
-    <div class="controls" aria-hidden="false">
-      <input id="searchInput" class="search-input" type="search" placeholder="Search products (name or description)..." aria-label="Search products">
-      <select id="categorySelect" class="category-select" aria-label="Select category">
-        <option value="All">All Categories</option>
-        <option value="iPhones">iPhones</option>
-        <option value="MacBooks">MacBooks</option>
-        <option value="iPads">iPads</option>
-        <option value="Apple Watches">Apple Watches</option>
-        <option value="Accessories">Accessories</option>
-        <option value="Others">Others</option>
-      </select>
+      <div class="hero-image"></div>
     </div>
+  </section>
 
-    <div class="results-info" id="resultsInfo" aria-live="polite"></div>
+  <!-- CONTROLS -->
+  <div class="controls container">
+    <input id="searchInput" class="search-input" placeholder="Search products (name or description)...">
+    <select id="categorySelect" class="category-select">
+      <option value="All">All Categories</option>
+      <option>iPhones</option>
+      <option>MacBooks</option>
+      <option>iPads</option>
+      <option>Apple Watches</option>
+      <option>Accessories</option>
+      <option>Others</option>
+    </select>
+  </div>
+  <div class="container results-info" id="resultsInfo"></div>
 
-    <!-- PRODUCTS GRID -->
-    <section id="products" class="products-section">
-      <div class="section-inner">
-        <h2>Featured Products</h2>
-        <div id="product-grid" class="product-grid" aria-live="polite"></div>
-        <p id="no-products" class="no-products" style="display:none;">No products yet — add some from the Add Product page.</p>
-      </div>
-    </section>
+  <!-- PRODUCTS -->
+  <section id="products" class="products-section">
+    <div class="section-inner container">
+      <h2>Featured Products</h2>
+      <div id="product-grid" class="product-grid" aria-live="polite"></div>
+      <p id="no-products" class="no-products" style="display:none;">No products yet — admin can add from the Admin page.</p>
+    </div>
+  </section>
 
-    <!-- ABOUT -->
-    <section class="about-section">
-      <div class="section-inner about-inner">
-        <div>
-          <h3>About B&amp;M Trading</h3>
-          <p>We are a trusted electronics retailer based in Nairobi — specialising in authentic Apple devices and accessories. Visit us at Queensway House, Kaunda Street.</p>
-        </div>
-        <div>
-          <h3>Contact</h3>
-          <p><strong>Phone:</strong> 0720 300 388</p>
-          <p><strong>Address:</strong> Queensway House, Kaunda St, Nairobi</p>
-        </div>
-      </div>
-    </section>
-  </main>
+  <a class="whatsapp-fab" href="https://wa.me/254720300388" target="_blank" rel="noopener">💬</a>
 
-  <a class="whatsapp-fab" href="https://wa.me/254720300388" target="_blank" rel="noopener" title="Chat with us on WhatsApp">💬</a>
-
-  <footer class="site-footer">
-    <div class="footer-inner">
-      <div>© <span id="year"></span> B&amp;M Trading LLP</div>
-      <div>Built with care — Nairobi</div>
+  <footer style="margin-top:40px;">
+    <div class="container center" style="padding:18px 0;color:var(--muted-text);">
+      © <span id="year"></span> B&M Trading LLP — Nairobi
     </div>
   </footer>
 
-  <!-- Firebase + filtering logic -->
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-    import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+    // Helpers
+    const esc = s => String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const num = n => (Number(n)||0).toLocaleString();
 
-    // your firebase config (storageBucket corrected)
-    const firebaseConfig = {
-      apiKey: "AIzaSyCjf6QOf7gdq1StOBdf5zWtWyde-Gis0Nc",
-      authDomain: "bm-trading-llp.firebaseapp.com",
-      projectId: "bm-trading-llp",
-      storageBucket: "bm-trading-llp.appspot.com",
-      messagingSenderId: "760421393441",
-      appId: "1:760421393441:web:bda19fd259add66b892f60",
-      measurementId: "G-FXSZ8BFMK2"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    // UI refs
+    // Load products from products.json at web root
+    let allProducts = [], filtered = [];
     const grid = document.getElementById('product-grid');
-    const noProductsEl = document.getElementById('no-products');
-    const searchInput = document.getElementById('searchInput');
-    const categorySelect = document.getElementById('categorySelect');
+    const noProducts = document.getElementById('no-products');
     const resultsInfo = document.getElementById('resultsInfo');
 
-    // state
-    let allProducts = []; // loaded from Firestore
-    let filteredProducts = [];
-
-    // helpers
-    const esc = s => String(s || '').replace(/[&<>"']/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
-    const num = n => (Number(n) || 0).toLocaleString();
-    const debounce = (fn, wait=250) => {
-      let t;
-      return (...args) => { clearTimeout(t); t = setTimeout(()=>fn(...args), wait); };
-    };
-
-    // fetch products from Firestore
     async function fetchProducts(){
-      grid.innerHTML = '';
-      noProductsEl.style.display = 'none';
-      resultsInfo.textContent = 'Loading products...';
-
       try {
-        // try to order by createdAt if present
-        const q = query(collection(db, 'products'), orderBy('createdAt', 'desc'));
-        const snap = await getDocs(q);
-        if (snap.empty) {
-          noProductsEl.style.display = 'block';
-          resultsInfo.textContent = '';
-          allProducts = [];
-          filteredProducts = [];
-          return;
-        }
-        allProducts = snap.docs.map(d => {
-          const data = d.data();
-          return {
-            id: d.id,
-            name: data.name || 'Unnamed',
-            price: data.price ?? 0,
-            imageURL: data.imageURL || data.image || 'https://via.placeholder.com/600x400?text=No+Image',
-            description: data.description || '',
-            category: data.category || 'Others',
-            createdAt: data.createdAt ? (data.createdAt.toDate ? data.createdAt.toDate() : data.createdAt) : null
-          };
-        });
+        const res = await fetch('/products.json', {cache: "no-store"});
+        if(!res.ok) throw new Error('Failed to load products.json');
+        allProducts = await res.json();
       } catch (err) {
-        // fallback: try to get documents without ordering
-        console.warn('Ordering by createdAt failed; falling back to unordered fetch.', err);
-        try {
-          const snap2 = await getDocs(collection(db, 'products'));
-          allProducts = snap2.docs.map(d => {
-            const data = d.data();
-            return {
-              id: d.id,
-              name: data.name || 'Unnamed',
-              price: data.price ?? 0,
-              imageURL: data.imageURL || data.image || 'https://via.placeholder.com/600x400?text=No+Image',
-              description: data.description || '',
-              category: data.category || 'Others',
-              createdAt: null
-            };
-          });
-        } catch (e2) {
-          console.error('Failed to fetch products:', e2);
-          grid.innerHTML = `<div class="load-error">Failed to load products. Check Firebase console & config (see console).</div>`;
-          resultsInfo.textContent = '';
-          return;
-        }
+        console.error(err);
+        allProducts = [];
       }
-
-      // initialize filteredProducts and render
-      filteredProducts = allProducts.slice();
+      filtered = allProducts.slice();
       renderProducts();
     }
 
-    // render products to grid
     function renderProducts(){
       grid.innerHTML = '';
-      if(!filteredProducts.length){
-        noProductsEl.style.display = 'block';
-        resultsInfo.textContent = 'No results.';
+      if(!filtered.length){
+        noProducts.style.display = 'block';
+        resultsInfo.textContent = '0 products';
         return;
       }
-      noProductsEl.style.display = 'none';
-      resultsInfo.textContent = `${filteredProducts.length} product${filteredProducts.length>1 ? 's' : ''} found.`;
-
-      filteredProducts.forEach(p => {
+      noProducts.style.display = 'none';
+      resultsInfo.textContent = `${filtered.length} product${filtered.length>1?'s':''} found`;
+      filtered.forEach(p=>{
         const card = document.createElement('article');
         card.className = 'product-card';
         card.innerHTML = `
-          <div class="card-media"><img src="${esc(p.imageURL)}" alt="${esc(p.name)}"></div>
+          <div class="card-media"><img src="${esc(p.imageURL||'https://via.placeholder.com/600x400')}" alt="${esc(p.name)}"></div>
           <div class="card-body">
             <h3 class="card-title">${esc(p.name)}</h3>
-            <p class="card-desc">${esc(p.description)}</p>
+            <p class="card-desc">${esc(p.description||'')}</p>
             <div class="card-footer">
               <div class="price">KSh ${num(p.price)}</div>
-              <button class="add-cart" 
-                data-id="${p.id}"
-                data-name="${esc(p.name)}"
-                data-price="${p.price}"
-                data-image="${esc(p.imageURL)}"
-                data-category="${esc(p.category)}">
-                Add to Cart
-              </button>
+              <button class="add-cart" data-id="${esc(p.id||'')}" data-name="${esc(p.name)}" data-price="${p.price}" data-image="${esc(p.imageURL)}">Add to Cart</button>
             </div>
           </div>
         `;
@@ -260,60 +118,46 @@
       });
     }
 
-    // apply search & category filters
+    // Filters
+    const searchInput = document.getElementById('searchInput');
+    const categorySelect = document.getElementById('categorySelect');
     function applyFilters(){
       const term = searchInput.value.trim().toLowerCase();
       const cat = categorySelect.value;
-
-      filteredProducts = allProducts.filter(p => {
-        const inCategory = (cat === 'All') ? true : ( (p.category || 'Others') === cat );
-        if(!inCategory) return false;
+      filtered = allProducts.filter(p=>{
+        const inCat = (cat === 'All') ? true : ((p.category||'Others') === cat);
+        if(!inCat) return false;
         if(!term) return true;
-        // match name or description
-        return p.name.toLowerCase().includes(term) || p.description.toLowerCase().includes(term);
+        return (p.name||'').toLowerCase().includes(term) || (p.description||'').toLowerCase().includes(term);
       });
-
       renderProducts();
     }
-
-    // debounce search input
-    const debouncedApply = debounce(applyFilters, 200);
-    searchInput.addEventListener('input', debouncedApply);
+    searchInput.addEventListener('input', ()=> setTimeout(applyFilters,150));
     categorySelect.addEventListener('change', applyFilters);
 
-    // add to cart delegation (same behavior)
-    document.addEventListener('click', (e) => {
+    // Add to cart (localStorage)
+    document.addEventListener('click', (e)=>{
       if(e.target.classList.contains('add-cart')){
         const ds = e.target.dataset;
         const product = {
-          id: ds.id,
+          id: ds.id || Date.now().toString(),
           name: ds.name,
-          price: Number(ds.price),
+          price: Number(ds.price)||0,
           imageURL: ds.image,
-          category: ds.category,
           quantity: 1
         };
-        let cart = JSON.parse(localStorage.getItem('cart')) || [];
-        const existing = cart.find(i => i.id === product.id);
-        if(existing) existing.quantity = (existing.quantity || 1) + 1;
+        let cart = JSON.parse(localStorage.getItem('cart')||'[]');
+        const existing = cart.find(i=>i.id===product.id);
+        if(existing) existing.quantity = (existing.quantity||1)+1;
         else cart.push(product);
         localStorage.setItem('cart', JSON.stringify(cart));
-
-        // toast feedback
-        const t = document.createElement('div');
-        t.className = 'toast';
-        t.textContent = `${product.name} added to cart`;
-        document.body.appendChild(t);
-        setTimeout(()=> t.classList.add('show'), 10);
-        setTimeout(()=> { t.classList.remove('show'); setTimeout(()=> t.remove(), 300); }, 2000);
+        const t = document.createElement('div'); t.className='toast'; t.textContent=`${product.name} added to cart`; document.body.appendChild(t);
+        setTimeout(()=>t.classList.add('show'),10); setTimeout(()=>{t.classList.remove('show'); setTimeout(()=>t.remove(),300)},2000);
       }
     });
 
-    // init
     document.getElementById('year').textContent = new Date().getFullYear();
     fetchProducts();
   </script>
 </body>
 </html>
-
-
