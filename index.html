@@ -1,75 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>B&M Trading LLP — Apple Products</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>B&M Trading LLP - Store</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header>
-    <div class="logo">🍏 B&M Trading LLP</div>
-    <nav>
-      <a href="index.html" class="active">Home</a>
-      <a href="add-product.html">Admin</a>
-    </nav>
+    <h1>B&M Trading LLP</h1>
+    <a href="add-product.html" class="admin-link">Admin</a>
   </header>
 
-  <section class="hero">
-    <h1>Apple Devices & Accessories</h1>
-    <p>Shop premium iPhones, MacBooks, iPads and more — all authentic and available in Nairobi.</p>
-    <a href="#products" class="btn">Browse Products</a>
-  </section>
+  <main id="product-list" class="product-list"></main>
 
-  <section id="products" class="products">
-    <h2>Available Products</h2>
-    <div id="product-grid" class="product-grid"></div>
-  </section>
-
-  <footer>
-    <p>© 2025 B&M Trading LLP | Nairobi, Kenya | Call 0720300388</p>
-  </footer>
-
-  <script>
-    async function loadProducts() {
-      const grid = document.getElementById("product-grid");
-      grid.innerHTML = "<p>Loading products...</p>";
-
-      try {
-        const res = await fetch("https://raw.githubusercontent.com/betbestt/bm-trading-llp/main/products.json");
-        const products = await res.json();
-
-        if (!products.length) {
-          grid.innerHTML = "<p>No products yet. Check again soon!</p>";
-          return;
-        }
-
-        grid.innerHTML = "";
-        products.forEach(p => {
-          const item = document.createElement("div");
-          item.className = "product";
-          item.innerHTML = `
-            <img src="${p.image}" alt="${p.name}">
-            <h3>${p.name}</h3>
-            <p class="price">KSh ${Number(p.price).toLocaleString()}</p>
-            <p>${p.status === 'sold' ? '<span class="sold">SOLD</span>' : ''}</p>
-            <button onclick="addToCart('${p.name}', ${p.price}, '${p.image}')">Add to Cart</button>
-          `;
-          grid.appendChild(item);
-        });
-      } catch (err) {
-        grid.innerHTML = "<p style='color:red'>Error loading products. Make sure your products.json exists in your GitHub repo.</p>";
-      }
-    }
-
-    function addToCart(name, price, image) {
-      let cart = JSON.parse(localStorage.getItem("cart") || "[]");
-      cart.push({ name, price, image });
-      localStorage.setItem("cart", JSON.stringify(cart));
-      alert("Added to cart!");
-    }
-
-    loadProducts();
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
