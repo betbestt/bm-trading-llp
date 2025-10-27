@@ -2,162 +2,74 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>B&M Trading LLP — Shop</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>B&M Trading LLP — Apple Products</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- NAVBAR -->
-  <header class="navbar">
-    <div class="navbar-inner">
-      <div class="brand">B&M Trading LLP</div>
-      <div class="nav-links">
-        <a href="index.html">Home</a>
-        <a href="add-product.html">Admin</a>
-        <a href="cart.html">Cart</a>
-        <a href="store-info.html">Store Info</a>
-      </div>
-    </div>
+  <header>
+    <div class="logo">🍏 B&M Trading LLP</div>
+    <nav>
+      <a href="index.html" class="active">Home</a>
+      <a href="add-product.html">Admin</a>
+    </nav>
   </header>
-  <div style="height:64px;"></div>
 
-  <!-- HERO -->
   <section class="hero">
-    <div class="hero-inner">
-      <div class="hero-content container">
-        <h1>The Latest Apple &amp; Tech Products</h1>
-        <p class="lead">Shop premium iPhones, MacBooks and accessories — genuine products, local warranty.</p>
-        <div style="margin-top:18px;">
-          <a href="#products" class="add-cart" style="background:#ffb400;padding:10px 16px;border-radius:8px;color:#111;text-decoration:none;">Shop Trending</a>
-        </div>
-      </div>
-      <div class="hero-image"></div>
-    </div>
+    <h1>Apple Devices & Accessories</h1>
+    <p>Shop premium iPhones, MacBooks, iPads and more — all authentic and available in Nairobi.</p>
+    <a href="#products" class="btn">Browse Products</a>
   </section>
 
-  <!-- CONTROLS -->
-  <div class="controls container">
-    <input id="searchInput" class="search-input" placeholder="Search products (name or description)...">
-    <select id="categorySelect" class="category-select">
-      <option value="All">All Categories</option>
-      <option>iPhones</option>
-      <option>MacBooks</option>
-      <option>iPads</option>
-      <option>Apple Watches</option>
-      <option>Accessories</option>
-      <option>Others</option>
-    </select>
-  </div>
-  <div class="container results-info" id="resultsInfo"></div>
-
-  <!-- PRODUCTS -->
-  <section id="products" class="products-section">
-    <div class="section-inner container">
-      <h2>Featured Products</h2>
-      <div id="product-grid" class="product-grid" aria-live="polite"></div>
-      <p id="no-products" class="no-products" style="display:none;">No products yet — admin can add from the Admin page.</p>
-    </div>
+  <section id="products" class="products">
+    <h2>Available Products</h2>
+    <div id="product-grid" class="product-grid"></div>
   </section>
 
-  <a class="whatsapp-fab" href="https://wa.me/254720300388" target="_blank" rel="noopener">💬</a>
-
-  <footer style="margin-top:40px;">
-    <div class="container center" style="padding:18px 0;color:var(--muted-text);">
-      © <span id="year"></span> B&M Trading LLP — Nairobi
-    </div>
+  <footer>
+    <p>© 2025 B&M Trading LLP | Nairobi, Kenya | Call 0720300388</p>
   </footer>
 
-  <script type="module">
-    // Helpers
-    const esc = s => String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-    const num = n => (Number(n)||0).toLocaleString();
+  <script>
+    async function loadProducts() {
+      const grid = document.getElementById("product-grid");
+      grid.innerHTML = "<p>Loading products...</p>";
 
-    // Load products from products.json at web root
-    let allProducts = [], filtered = [];
-    const grid = document.getElementById('product-grid');
-    const noProducts = document.getElementById('no-products');
-    const resultsInfo = document.getElementById('resultsInfo');
-
-    async function fetchProducts(){
       try {
-        const res = await fetch('/products.json', {cache: "no-store"});
-        if(!res.ok) throw new Error('Failed to load products.json');
-        allProducts = await res.json();
+        const res = await fetch("https://raw.githubusercontent.com/betbestt/bm-trading-llp/main/products.json");
+        const products = await res.json();
+
+        if (!products.length) {
+          grid.innerHTML = "<p>No products yet. Check again soon!</p>";
+          return;
+        }
+
+        grid.innerHTML = "";
+        products.forEach(p => {
+          const item = document.createElement("div");
+          item.className = "product";
+          item.innerHTML = `
+            <img src="${p.image}" alt="${p.name}">
+            <h3>${p.name}</h3>
+            <p class="price">KSh ${Number(p.price).toLocaleString()}</p>
+            <p>${p.status === 'sold' ? '<span class="sold">SOLD</span>' : ''}</p>
+            <button onclick="addToCart('${p.name}', ${p.price}, '${p.image}')">Add to Cart</button>
+          `;
+          grid.appendChild(item);
+        });
       } catch (err) {
-        console.error(err);
-        allProducts = [];
+        grid.innerHTML = "<p style='color:red'>Error loading products. Make sure your products.json exists in your GitHub repo.</p>";
       }
-      filtered = allProducts.slice();
-      renderProducts();
     }
 
-    function renderProducts(){
-      grid.innerHTML = '';
-      if(!filtered.length){
-        noProducts.style.display = 'block';
-        resultsInfo.textContent = '0 products';
-        return;
-      }
-      noProducts.style.display = 'none';
-      resultsInfo.textContent = `${filtered.length} product${filtered.length>1?'s':''} found`;
-      filtered.forEach(p=>{
-        const card = document.createElement('article');
-        card.className = 'product-card';
-        card.innerHTML = `
-          <div class="card-media"><img src="${esc(p.imageURL||'https://via.placeholder.com/600x400')}" alt="${esc(p.name)}"></div>
-          <div class="card-body">
-            <h3 class="card-title">${esc(p.name)}</h3>
-            <p class="card-desc">${esc(p.description||'')}</p>
-            <div class="card-footer">
-              <div class="price">KSh ${num(p.price)}</div>
-              <button class="add-cart" data-id="${esc(p.id||'')}" data-name="${esc(p.name)}" data-price="${p.price}" data-image="${esc(p.imageURL)}">Add to Cart</button>
-            </div>
-          </div>
-        `;
-        grid.appendChild(card);
-      });
+    function addToCart(name, price, image) {
+      let cart = JSON.parse(localStorage.getItem("cart") || "[]");
+      cart.push({ name, price, image });
+      localStorage.setItem("cart", JSON.stringify(cart));
+      alert("Added to cart!");
     }
 
-    // Filters
-    const searchInput = document.getElementById('searchInput');
-    const categorySelect = document.getElementById('categorySelect');
-    function applyFilters(){
-      const term = searchInput.value.trim().toLowerCase();
-      const cat = categorySelect.value;
-      filtered = allProducts.filter(p=>{
-        const inCat = (cat === 'All') ? true : ((p.category||'Others') === cat);
-        if(!inCat) return false;
-        if(!term) return true;
-        return (p.name||'').toLowerCase().includes(term) || (p.description||'').toLowerCase().includes(term);
-      });
-      renderProducts();
-    }
-    searchInput.addEventListener('input', ()=> setTimeout(applyFilters,150));
-    categorySelect.addEventListener('change', applyFilters);
-
-    // Add to cart (localStorage)
-    document.addEventListener('click', (e)=>{
-      if(e.target.classList.contains('add-cart')){
-        const ds = e.target.dataset;
-        const product = {
-          id: ds.id || Date.now().toString(),
-          name: ds.name,
-          price: Number(ds.price)||0,
-          imageURL: ds.image,
-          quantity: 1
-        };
-        let cart = JSON.parse(localStorage.getItem('cart')||'[]');
-        const existing = cart.find(i=>i.id===product.id);
-        if(existing) existing.quantity = (existing.quantity||1)+1;
-        else cart.push(product);
-        localStorage.setItem('cart', JSON.stringify(cart));
-        const t = document.createElement('div'); t.className='toast'; t.textContent=`${product.name} added to cart`; document.body.appendChild(t);
-        setTimeout(()=>t.classList.add('show'),10); setTimeout(()=>{t.classList.remove('show'); setTimeout(()=>t.remove(),300)},2000);
-      }
-    });
-
-    document.getElementById('year').textContent = new Date().getFullYear();
-    fetchProducts();
+    loadProducts();
   </script>
 </body>
 </html>
